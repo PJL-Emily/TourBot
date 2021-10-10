@@ -1,12 +1,5 @@
 @import 'library';
 
-h1 {
-  @include mt-2;
-  font-size: $large;
-  font-weight: bold;
-  color: $red;
-}
-
 .App {
   margin: 0 auto;
   text-align: center;
@@ -16,7 +9,8 @@ h1 {
   }
 
   .logo {
-    height: 40vmin;
+    @include mt-5;
+    height: 35vmin;
   }
 
   .header {
@@ -24,11 +18,18 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  h1 {
+    @include mt-3;
+    font-size: $large;
+    font-weight: bold;
+    color: $red;
   }
 
   .chatBtn {
-    @include mt-1;
+    @include mt-2;
     padding: 12px 40px;
     border-radius: 50px;
     background-color: $red;
@@ -36,6 +37,7 @@ h1 {
     border: none;
     font-size: $medium;
     font-weight: bold;
+    text-decoration: none;
 
     &:hover {
       cursor: pointer;
@@ -55,5 +57,5 @@ h1 {
   left: 0;
   right: 0;
   z-index: -1;
-  opacity: 0.4;;
+  opacity: 0.3;
 }
