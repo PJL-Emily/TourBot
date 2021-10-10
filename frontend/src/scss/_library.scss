@@ -1,8 +1,12 @@
 $red: #b83d2b;
+$red-darker: #a03b30;
 
 $large: 60px;
 $medium: 20px;
 
-@mixin mt {
-    margin-top: 20px;
+@mixin mt-1 {
+    margin-top: 30px;
+}
+@mixin mt-2 {
+    margin-top: 50px;
 }
