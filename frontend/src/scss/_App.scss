@@ -22,20 +22,15 @@
   }
 
   h1 {
-    @include mt-3;
+    @include mt-1;
     font-size: $large;
     font-weight: bold;
     color: $red;
   }
 
   .chatBtn {
-    @include mt-2;
-    padding: 12px 40px;
-    border-radius: 50px;
     background-color: $red;
-    color: white;
-    border: none;
-    font-size: $medium;
+    border: $red-darker;
     font-weight: bold;
     text-decoration: none;
 

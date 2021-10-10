@@ -1,0 +1,18 @@
+@import 'library';
+
+.ant-radio-checked {
+    .ant-radio-inner{
+        border-color: $red !important ;
+        &:after, &:focus {
+            background-color: $red;
+        }
+    }
+
+}
+.ant-radio {
+    &:hover {
+        .ant-radio-inner {
+            border-color: $red !important;
+        }
+    }
+}
