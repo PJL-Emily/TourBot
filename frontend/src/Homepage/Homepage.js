@@ -1,5 +1,7 @@
 import logo from '../img/logo.png';
 import '../scss/main.scss';
+import 'antd/dist/antd.css';
+import CollectionsPage from '../Modal/ModalForm';
 
 function Homepage() {
   return (
@@ -9,9 +11,11 @@ function Homepage() {
 
             <h1>TourBot</h1>
 
-            <button className="App chatBtn" href="../Chatpage/Chatpage.js">
+            <CollectionsPage />
+
+            {/* <button className="App chatBtn" href="../Chatpage/Chatpage.js">
                 開始聊天
-            </button>
+            </button> */}
         </header>
     </div>
   );
