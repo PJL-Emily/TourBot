@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import axios from 'axios';
 import { Button, Modal, Form, Radio } from 'antd';
-import '../scss/main.scss';
+import AuthService from "../../services/auth.service";
+import '../../scss/main.scss';
 
 const CollectionCreateForm = ({ visible, onCreate, onCancel }) => {
   const [form] = Form.useForm();
@@ -90,30 +90,34 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel }) => {
 
 const CollectionsPage = () => {
   const [visible, setVisible] = useState(false);
-    const [redirect, setRedirect] = useState(false);
+  const [redirect, setRedirect] = useState(false);
 
   const onCreate = (values) => {
-    // TODO: change url
-    axios.post('~/submitUserInfo', {
-      gender: values.gender,
-      age: values.age,
-      purpose: values.purpose
+    AuthService.submitUserInfo(values.purpose, values.gender, values.age)
+    .then(() => {
+        console.log('Received values of form: ', values);
+        setRedirect(true);
+        setVisible(false);
     })
-    .then(res => {
-      console.log(res);
-      console.log(res.data);
-      setRedirect(true);
-    })
-    .catch(err => {
-      console.log(err);
-      setRedirect(true); /////
-    })
-    console.log('Received values of form: ', values);
-    setVisible(false);
+    .catch(error => {
+        const resMessage =
+          (error.response && error.response.data 
+            && error.response.data.message) || 
+            error.message || error.toString();
+        
+        console.log('submitUserInfo error: ', resMessage);
+        // TEST
+        alert('測試階段：submitUserInfo 失敗同樣導入聊天室');
+        setRedirect(true);
+        setVisible(false);
+        //
+    });
   };
 
   if (redirect) {
-    return <Redirect to='../Chatpage/Chatpage'/>;
+    return (
+      <Redirect to="/chatroom/" />
+    );
   }
   return (
     <div>
