@@ -12,10 +12,6 @@ function Homepage() {
             <h1>TourBot</h1>
 
             <CollectionsPage />
-
-            {/* <button className="App chatBtn" href="../Chatpage/Chatpage.js">
-                開始聊天
-            </button> */}
         </header>
     </div>
   );

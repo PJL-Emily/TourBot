@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Redirect } from 'react-router-dom';
+import axios from 'axios';
 import { Button, Modal, Form, Radio } from 'antd';
 import '../scss/main.scss';
 
@@ -17,7 +19,6 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel }) => {
           .then((values) => {
             form.resetFields();
             onCreate(values);
-            // TODO: redirect to chatpage
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -89,13 +90,31 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel }) => {
 
 const CollectionsPage = () => {
   const [visible, setVisible] = useState(false);
+    const [redirect, setRedirect] = useState(false);
 
   const onCreate = (values) => {
-    // TODO: axios.post + then/catch
+    // TODO: change url
+    axios.post('~/submitUserInfo', {
+      gender: values.gender,
+      age: values.age,
+      purpose: values.purpose
+    })
+    .then(res => {
+      console.log(res);
+      console.log(res.data);
+      setRedirect(true);
+    })
+    .catch(err => {
+      console.log(err);
+      setRedirect(true); /////
+    })
     console.log('Received values of form: ', values);
     setVisible(false);
   };
 
+  if (redirect) {
+    return <Redirect to='../Chatpage/Chatpage'/>;
+  }
   return (
     <div>
       <Button
