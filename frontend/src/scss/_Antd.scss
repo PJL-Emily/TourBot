@@ -16,3 +16,23 @@
         }
     }
 }
+
+.ant-btn {
+    &:hover {
+        color: $red !important;
+        border-color: $red !important;
+    }
+}
+
+.ant-btn-primary {
+    background-color: $red !important;
+    border-color: $red !important;
+
+    &:hover {
+        background-color: $red-darker !important;
+        border-color: $red-darker !important;
+    }
+    &.ant-btn {
+        color: white !important;
+    }
+}
