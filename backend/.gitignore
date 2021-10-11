@@ -85,3 +85,7 @@ test.py
 
 *.egg-info
 pre-trained-models/
+
+
+# orgin setup
+setup_origin.py
