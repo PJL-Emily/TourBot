@@ -39,6 +39,7 @@ instance.interceptors.response.use(
                 let refreshToken = TokenService.getLocalRefreshToken();
                 if (refreshToken) {
                     const rs = await instance.post("/auth/getChatStatus", {
+                        user_id: '',
                         stat: 'refresh'
                     });
                     const { accessToken } = rs.data;

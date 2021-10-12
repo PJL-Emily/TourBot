@@ -3,7 +3,7 @@ import 'antd/dist/antd.css';
 import '../../scss/main.scss';
 import CollectionsPage from '../Modal/ModalForm';
 
-function Homepage() {
+function Homepage (props) {
   return (
     <div className="App homepage">
         <header className="App header">
@@ -11,7 +11,7 @@ function Homepage() {
 
             <h1>TourBot</h1>
 
-            <CollectionsPage />
+            <CollectionsPage setUserID={props.setUserID} />
         </header>
     </div>
   );
