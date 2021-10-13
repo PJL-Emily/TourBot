@@ -1,0 +1,38 @@
+@import 'library';
+
+.ant-radio-checked {
+    .ant-radio-inner{
+        border-color: $red !important ;
+        &:after, &:focus {
+            background-color: $red;
+        }
+    }
+
+}
+.ant-radio {
+    &:hover {
+        .ant-radio-inner {
+            border-color: $red !important;
+        }
+    }
+}
+
+.ant-btn {
+    &:hover {
+        color: $red !important;
+        border-color: $red !important;
+    }
+}
+
+.ant-btn-primary {
+    background-color: $red !important;
+    border-color: $red !important;
+
+    &:hover {
+        background-color: $red-darker !important;
+        border-color: $red-darker !important;
+    }
+    &.ant-btn {
+        color: white !important;
+    }
+}
