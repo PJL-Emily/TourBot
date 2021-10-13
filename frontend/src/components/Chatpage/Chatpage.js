@@ -7,7 +7,6 @@ function Chatpage (props) {
   return (
     <div className="App homepage">
         <header className="App header">
-          <h1>Chatpage {props.user_id}</h1>
           <div className="Chat mainroom">
             <div className="Chat dialogue">
               <div className="Chat chatbox">
