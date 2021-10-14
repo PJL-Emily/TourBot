@@ -12,6 +12,8 @@ verify_ssl = true
 mytest = {editable = true, path = "."}
 torch = {index = "pytorch", version = "==1.5.1+cpu"}
 torchvision = {index = "pytorch", version = "==0.6.1+cpu"}
+flask = "*"
+flask-pymongo = "*"
 
 [dev-packages]
 
