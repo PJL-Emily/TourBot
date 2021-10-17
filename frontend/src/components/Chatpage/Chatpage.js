@@ -20,6 +20,7 @@ function Chatpage (props) {
   }
 
   return (
+
     <div className="App chatpage">
         <div className="Chat header">
           {/* <h1>Chatpage {props.user_id}</h1> */}

@@ -3,7 +3,7 @@ import TokenService from "./token.service";
 
 const submitUserInfo = async (purpose, gender, age) => {
     const response = await api
-        .post("auth/submitUserInfo", {
+        .post("submitUserInfo", {
             purpose: purpose,
             gender: gender,
             age: age
@@ -14,12 +14,12 @@ const submitUserInfo = async (purpose, gender, age) => {
     return response.data;
 };
 
-const restart = async (user_id) => {
+const restart = async () => {
     try {
         const res = await api
-            .post("auth/getChatStatus", {
-                user_id: user_id,
-                stat: 'restart'
+            .post("restartSession", {
+                // user_id: user_id,
+                // stat: 'restart'
             });
         console.log(res);
     } 
@@ -28,12 +28,12 @@ const restart = async (user_id) => {
     }
 };
 
-const exit = async (user_id) => {
+const exit = async () => {
     try {
         await api
-            .post("auth/getChatStatus", {
-                user_id: user_id,
-                stat: 'exit'
+            .post("exit", {
+                // user_id: user_id,
+                // stat: 'exit'
             });
         TokenService.removeUser();
     } 

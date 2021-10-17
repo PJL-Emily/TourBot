@@ -1,6 +1,7 @@
 # extras
-Pipfile*
+Pipfile.*
 results*
+pyproject.toml
 
 *.pyc
 __pycache__
