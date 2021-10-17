@@ -14,7 +14,7 @@ function App() {
           <Route exact path="/">
             <Homepage setUserID={setUserID} />
           </Route>
-          <Route path="/chatroom/">
+          <Route exact path="/chatroom/">
             <Chatpage user_id={user_id} />
           </Route>
         </Switch>

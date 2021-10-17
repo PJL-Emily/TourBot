@@ -4,46 +4,164 @@
     margin: 0 auto;
     text-align: center;
 }
+
+.chatpage {
+    position: relative;
+  
+    &:before {
+      content: "";
+      background-color: #f4f4f4;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: -1;
+      opacity: 0.3;
+    }
+}
  
 .mainroom {
-    width: 97.5%;
+    width: 100%;
     display: flex;
     flex-direction: row;
-    height: 550px;
+    height: 100%;
+    // max-height: 800px;
+    // @include mt-1;
 }
 
 .dialogue {
     width: 65%;
-    border: 1px solid #000;
+    height: 100vh;
+    // border: 1px solid #000;
 
     .chatbox {
-        background-color:rgba(220,38,38,0.2);
-        height: 514px;
+        // background-color:rgba(220,38,38,0.2);
+        // background-color:rgba(255,255,255,0.2);
+
+        // height: 614px;
+        height: 92%;
     }
 
     .inputbox {
         width: 80%;
         text-align: left;
-        height: 36px;
+        height: 5%;
         border: none;
+        border-radius: 10px 0px 0px 10px;
+        background-color: #f4f4f4;
+    }
+
+    .sendbtn{
+        width: 10%;
+        height: 5%;
+        border: none;
+        background-color: $red;
+        color: white;
+        border-radius: 0px 10px 10px 0px;
+        font-weight: bold;
+    }
+    .sendbtn:hover{
+        background-color: $red-darker;
+        cursor: pointer;
     }
 }
 
 .inform {
     width: 35%;
-    border: 1px solid #000;
-
-    .logo {
-        @include mt-1;
-        height: 15vmin;
-        margin-left: 10px;
-        margin-right: 10px;
+    // border: 1px solid #000;
+    color: $red-darker;
+    background: $wheat;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    padding-bottom: 30px;
+    h2 {
+        font-size: $medium;
+        font-weight:bold;
+        color: $red-darker;
     }
+    h3 {
+        font-size: $small;
+        color: $red-darker;
+    }
+    p {
+        font-size: $extra-small;
+    }
+    
+    .logo{
+        @include mt-1;
+        height: 25vmin;
+    }
+
+    .btn{
+        @include mt-1;
+        width: 25%;
+        margin: 5%;
+    }
+
 
     .infoFunction {
         @include mt-1;
-        width: 70%;
+        width: 50%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
 
-        
+        .info-btn {
+            border-radius: 50%;
+            height: 70px;
+            width: 70px;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            span {
+                text-align: center;
+                width: 50%;
+                color: white;
+            }
+        }
+        .preview-btn{
+            background-color: $orange;
+        }
+        .bed-btn{
+            background-color: $yellow;
+        }
+        .museum-btn{
+            background-color: $aqua;
+        }
+        .restaurant-btn{
+            background-color: $navy;
+        }
+    }
+
+    .infoExit {
+        @include mt-2;
+        display: flex;
+        flex-direction: row;
+        width: 70%;
+        justify-content: center;
+
+        p {
+            margin: 3px;
+        }
+
+        .restart, .leave {
+            width: 30%;
+            margin: 0;
+
+            a {
+                color: $red;
+                font-weight: bold;
+            }
+            a:hover {
+                font-weight: bold;
+            }
+        }
     }
 }
