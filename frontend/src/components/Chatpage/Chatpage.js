@@ -1,12 +1,11 @@
 import logo from '../../img/logo.png';
 import 'antd/dist/antd.css';
 import '../../scss/main.scss';
-// import MaterialIcon, {colorPalette} from 'material-icons-react';
 import { Link, Redirect } from 'react-router-dom';
+import ViewState from './ViewState';
+import ViewItem from './Swiper';
 
 function Chatpage (props) {
-  // console.log('in chatpage, user_id: ', user_id);
-
   // TRY Refresh
   function refreshPage() {
     window.location.reload(false);
@@ -27,7 +26,6 @@ function Chatpage (props) {
           <div className="Chat mainroom">
             <div className="Chat dialogue">
               <div className="Chat chatbox">
-
               </div>
               <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..."></input>
               <input className="Chat sendbtn" type="submit" id="usrsend" name="usrsend" value="傳送"></input>
@@ -37,38 +35,10 @@ function Chatpage (props) {
               <h2>TourBot</h2>
               <h3>很高興為您服務！</h3>
               <div className="Chat infoFunction">
-                <a href="#" className="info-btn preview-btn">
-                  <span className="material-icons Chat btn">
-                    preview
-                  </span>
-                  <span>
-                    檢視
-                  </span>
-                </a>
-                <a href="#" className="info-btn bed-btn">
-                  <span className="material-icons Chat btn">
-                    bed
-                  </span>
-                  <span>
-                    酒店
-                  </span>
-                </a>
-                <a href="#" className="info-btn museum-btn">
-                  <span className="material-icons Chat btn">
-                    museum
-                  </span>
-                  <span>
-                    景點
-                  </span>                
-                </a>
-                <a href="#" className="info-btn restaurant-btn">
-                  <span className="material-icons Chat btn">
-                    restaurant_menu
-                  </span>
-                  <span>
-                    餐廳
-                  </span>              
-                </a>
+                <ViewState />
+                <ViewItem type="酒店" />
+                <ViewItem type="景點" />
+                <ViewItem type="餐廳" />
               </div>
               <div className="Chat infoExit">
                 <div className="Chat restart">

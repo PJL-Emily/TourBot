@@ -88,14 +88,15 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel }) => {
   );
 };
 
-const CollectionsPage = (setUserID) => {
+const CollectionsPage = ({ setUserID }) => {
   const [visible, setVisible] = useState(false);
   const [redirect, setRedirect] = useState(false);
 
   const onCreate = (values) => {
     AuthService.submitUserInfo(values.purpose, values.gender, values.age)
-    .then(() => {
+    .then(data => {
         console.log('Received values of form: ', values);
+        console.log('Response data: ', data);
         setUserID(values.user_id);
         setRedirect(true);
         setVisible(false);

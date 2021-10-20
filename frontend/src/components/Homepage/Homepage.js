@@ -1,7 +1,7 @@
 import logo from '../../img/logo.png';
 import 'antd/dist/antd.css';
 import '../../scss/main.scss';
-import CollectionsPage from '../Modal/ModalForm';
+import CollectionsPage from './ModalForm';
 
 function Homepage (props) {
   return (

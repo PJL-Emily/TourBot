@@ -49,7 +49,7 @@
         height: 5%;
         border: none;
         border-radius: 10px 0px 0px 10px;
-        background-color: #f4f4f4;
+        background-color: $gray-lighter;
     }
 
     .sendbtn{
@@ -74,7 +74,7 @@
     background: $wheat;
     display: flex;
     flex-direction: column;
-    justify-content: end;
+    justify-content: flex-end;
     padding-bottom: 30px;
     h2 {
         font-size: $medium;
@@ -119,7 +119,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            outline: none;
+            border: none;
             @include transition-2;
+
+            &:hover {
+                cursor: pointer;
+            }
 
             span {
                 text-align: center;

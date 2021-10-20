@@ -9,7 +9,8 @@ $aqua-darker: #93bbbb;
 $navy: #233774;
 $navy-darker: #141c35;
 $gray: #a8a8a8;
-$gray-lighter: #a8a8a8;
+$gray-lighter: #f4f4f4;
+$gray-darker: #706c6c;
 $wheat: #f9f3ea;
 $white: white;
 $black: black;
@@ -24,6 +25,9 @@ $small-font: 12px;
 $medium-font: 16px;
 $large-font: 24px;
 
+@mixin mt-0 {
+    margin-top: 10px;
+}
 @mixin mt-1 {
     margin-top: 20px;
 }
@@ -38,6 +42,11 @@ $large-font: 24px;
 }
 @mixin mt-5 {
     margin-top: 100px;
+}
+
+@mixin m-lr($margin) {
+    margin-left: $margin;
+    margin-right: $margin;
 }
 
 @mixin transition-1 {
