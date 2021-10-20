@@ -1,0 +1,9 @@
+@import 'library';
+
+.swiper-button-prev, .swiper-button-next {
+    color: $red !important;
+}
+
+.swiper-pagination-bullet-active-main {
+    background-color: $red !important;
+}

@@ -119,6 +119,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            @include transition-2;
 
             span {
                 text-align: center;
@@ -128,15 +129,31 @@
         }
         .preview-btn{
             background-color: $orange;
+
+            &:hover {
+                background-color: $orange-darker;
+            }
         }
         .bed-btn{
             background-color: $yellow;
+
+            &:hover {
+                background-color: $yellow-darker;
+            }
         }
         .museum-btn{
             background-color: $aqua;
+
+            &:hover {
+                background-color: $aqua-darker;
+            }
         }
         .restaurant-btn{
             background-color: $navy;
+
+            &:hover {
+                background-color: $navy-darker;
+            }
         }
     }
 
@@ -163,5 +180,22 @@
                 font-weight: bold;
             }
         }
+    }
+}
+
+.state-list {
+    font-size: $medium-font;
+    line-height: 2.5;
+
+    .material-icons {
+        color: $red;
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+    li {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 }
