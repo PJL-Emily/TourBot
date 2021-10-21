@@ -2,91 +2,56 @@ import api from "./api";
 import TokenService from "./token.service";
 
 const submitUserInfo = async (purpose, gender, age) => {
-    try {
-        const response = await api
-            .post("submitUserInfo", {
-                purpose: purpose,
-                gender: gender,
-                age: age
-            });
-        if (response.data.accessToken) {
-            TokenService.setUser(response.data);
-        }
-        return response.data;
+    // TODO: remove try catch
+    const response = await api
+        .post("submitUserInfo", {
+            purpose: purpose,
+            gender: gender,
+            age: age
+        });
+    if (response.data.accessToken) {
+        TokenService.setUser(response.data);
     }
-    catch (err) {
-        console.log(err);
-    }
+    return response.data;
 };
 
 const restart = async () => {
-    try {
-        const res = await api
-            .post("restartSession", {});
-        console.log(res);
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    const res = await api
+        .post("restartSession", {});
+    console.log(res);
 };
 
 const exit = async () => {
-    try {
-        await api
-            .post("exit", {});
-        TokenService.removeUser();
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    await api.post("exit", {});
+    TokenService.removeUser();
 };
 
 const getUserState = async () => {
-    try {
-        const response = await api
-            .get("getUserState", {});
-
-        return response.data;
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    const response = await api
+        .get("getUserState", {});
+    
+    return response.data;
 };
 
 const getHotelInfo = async () => {
-    try {
-        const response = await api
-            .get("getHotelInfo", {});
+    const response = await api
+        .get("getHotelInfo", {});
 
-        return response.data;
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    return response.data;
 };
 
 const getSiteInfo = async () => {
-    try {
-        const response = await api
-            .get("getSiteInfo", {});
+    const response = await api
+        .get("getSiteInfo", {});
 
-        return response.data;
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    return response.data;
 };
 
 const getRestInfo = async () => {
-    try {
-        const response = await api
-            .get("getRestInfo", {});
+    const response = await api
+        .get("getRestInfo", {});
 
-        return response.data;
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    return response.data;
 };
 
 const AuthService = {
