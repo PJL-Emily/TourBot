@@ -1,12 +1,17 @@
 import logo from '../../img/logo.png';
 import 'antd/dist/antd.css';
 import '../../scss/main.scss';
-import { Link } from 'react-router-dom';
+import { useIdleTimer } from 'react-idle-timer';
+import { Link, useHistory } from 'react-router-dom';
 import ViewState from './ViewState';
 import ViewItem from './Swiper';
 import AuthService from "../../services/auth.service";
 
-function Chatpage (props) {
+function Chatpage () {
+  const history = useHistory();
+  function navigateToHome () {
+    history.push("/");
+  };
   function refreshPage () {
     let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
     if (window.confirm(msg)) {
@@ -31,6 +36,33 @@ function Chatpage (props) {
       event.preventDefault();
     }
   }
+
+  const handleOnIdle = () => {
+    console.log('user is idle');
+    window.alert('您已閒置過久，將自動導入首頁重新進入聊天');
+    // TODO: how to force close modal?
+    // in restart/exit confirm window, idle timer does not work
+    console.log('last active', getLastActiveTime());
+    AuthService.exit()
+    .catch((err) => {
+      console.log(err);
+    });
+    navigateToHome();
+  }
+  const handleOnActive = () => {
+    console.log('user is active');
+    console.log('time remaining', getRemainingTime());
+  };
+  const handleOnAction = () => {
+    console.log('user did something');
+  };
+  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+    timeout: 1000 * 30 * 1, // idle time: 30 min
+    onIdle: handleOnIdle,
+    onActive: handleOnActive,
+    onAction: handleOnAction,
+    debounce: 500
+  });
 
   return (
 
@@ -65,13 +97,11 @@ function Chatpage (props) {
                 </div>
                 <div className="Chat leave">
                   <Link to="/" onClick={exitPage}>
-                  {/* <a onClick={exitPage}> */}
                     <span className="material-icons Chat btn">
                       logout
                     </span>            
                     <p>離開</p>
                   </Link>
-                  {/* </a> */}
                 </div>
               </div>
             </div>
