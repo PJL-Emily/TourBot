@@ -37,6 +37,7 @@
         color: $gray;
 
         .material-icons {
+            font-size: 20px;
             color: $yellow;
         }
     }
@@ -53,7 +54,8 @@
 
     .material-icons {
         color: $red;
-        margin-right: 3px;
+        font-size: 20px;
+        margin-right: 6px;
     }
 
     a {

@@ -4,18 +4,32 @@ import '../../scss/main.scss';
 import { Link, Redirect } from 'react-router-dom';
 import ViewState from './ViewState';
 import ViewItem from './Swiper';
+import AuthService from "../../services/auth.service";
 
 function Chatpage (props) {
-  // TRY Refresh
-  function refreshPage() {
-    window.location.reload(false);
+  function refreshPage () {
+    let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
+    if (window.confirm(msg)) {
+      AuthService.restart()
+      .then(() => {
+        window.location.reload(false);
+      })
+      .catch((err) => {
+          console.log(err);
+      }); 
+    }
   }
-  // TRY Exit
-  function exitPage() {
-    // console.log('in chatpage');
-    return (
-      <Redirect to=".." />
-    );
+  function exitPage (event) {
+    let msg = "您確定要離開聊天室嗎？\n所有聊天記錄將被清空，您將需要重新填寫個人資訊";
+    if (window.confirm(msg)) {
+      AuthService.exit()
+      .catch((err) => {
+        console.log(err);
+      });
+    }
+    else {
+      event.preventDefault();
+    }
   }
 
   return (
@@ -50,12 +64,14 @@ function Chatpage (props) {
                   </a>
                 </div>
                 <div className="Chat leave">
-                  <Link to="/">
+                  <Link to="/" onClick={exitPage}>
+                  {/* <a onClick={exitPage}> */}
                     <span className="material-icons Chat btn">
                       logout
                     </span>            
                     <p>離開</p>
                   </Link>
+                  {/* </a> */}
                 </div>
               </div>
             </div>
