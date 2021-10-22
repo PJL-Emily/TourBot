@@ -4,7 +4,7 @@ from convlab2.policy.mle.crosswoz.mle import MLE
 from convlab2.nlg.sclstm.crosswoz.sc_lstm import SCLSTM
 from copy import deepcopy
 
-class Pipline():
+class Pipeline():
     def __init__(self):
         # BERT nlu
         self.nlu = BERTNLU()
