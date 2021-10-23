@@ -10,7 +10,13 @@ export default class MessageList extends Component {
   }
 
   render() {
-    const { threads, index } = this.props;
+    // const { threads, index } = this.props;
+    const threads = this.props.threads
+    const index = this.props.index
+    console.log(threads);
+    console.log(index);
+    console.log(threads[index]);
+    console.log(threads[index].messages[0])
     const messages = threads[index].messages;
     return (
       <div>

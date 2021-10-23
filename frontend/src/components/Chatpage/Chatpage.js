@@ -1,29 +1,9 @@
 import logo from '../../img/logo.png';
 import 'antd/dist/antd.css';
 import '../../scss/main.scss';
-// import MaterialIcon, {colorPalette} from 'material-icons-react';
-import { Link, Redirect } from 'react-router-dom';
-import AuthService from "../../services/auth.service";
 import React, { useState } from 'react';
 import MessageList from './MessageList';
 import UserInput from './UserInput';
-
-function Chatpage (props) {
-  // console.log('in chatpage, user_id: ', user_id);
-
-  // TRY Restart
-  function restartPage() {
-    const onRestart = (values) => {
-      AuthService.restart()
-    }
-
-    window.location.reload(false);
-  }
-  
-  // Try Exit
-
-  // Handle Input
-  const [state = useState(0);]
 import { useIdleTimer } from 'react-idle-timer';
 import { Link, useHistory } from 'react-router-dom';
 import ViewState from './ViewState';
@@ -80,12 +60,49 @@ function Chatpage () {
     console.log('user did something');
   };
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
-    timeout: 1000 * 30 * 1, // idle time: 30 min
+    timeout: 1000 * 60 * 30 * 1, // idle time: 30 min
     onIdle: handleOnIdle,
     onActive: handleOnActive,
     onAction: handleOnAction,
     debounce: 500
   });
+
+  function handleMessageChange(event) {
+    setState({ currentIndex: event});
+  }
+  function handleKeyDown(event) {
+    const message = event.target.value;
+    const time = new Date().toDateString();
+    const addMessage = {fromMe: true, text: message, time: time};
+
+    if (event.keyCode === 13 && message !== '') {
+      const {threads, currentIndex} = initialState;
+      threads[currentIndex].messages.push(addMessage);
+
+      setState({
+        newMessage: '',
+        threads: threads
+      });
+    }
+  }
+
+  // Handle Input
+  const [initialState, setState] = React.useState({
+    newMessage:'',
+    threads: [
+      {
+        target:{
+          name:'System',
+        },
+        messages: [
+          {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
+        ]
+      }
+    ],
+    currentIndex: 0
+  })
+
+
 
   return (
 
@@ -95,12 +112,21 @@ function Chatpage () {
           <div className="Chat mainroom">
             <div className="Chat dialogue">
               <div className="Chat chatbox">
-                {/* <MessageList threads={threads} index={currentIndex} /> */}
+                <div className="message-list">
+                  <MessageList threads={initialState.threads} index={initialState.currentIndex} />
+                </div>
               </div>
-              <form className="Chat inputForm">
-                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..."></input>
+              {/* <div className="Chat inputForm">
+                <UserInput
+                  newMessage={initialState.newMessage}
+                  messageChange={handleMessageChange}
+                  handleKeyDown={handleKeyDown}
+                />
+              </div> */}
+              <div className="Chat inputForm">
+                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={initialState.newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
                 <button className="Chat sendbtn" type="submit" id="usrsend" name="usrsend">傳送</button>
-              </form>
+              </div>
             </div>
             <div className="Chat inform">
               <img src={logo} className="Chat logo" alt="logo" />
@@ -114,7 +140,7 @@ function Chatpage () {
               </div>
               <div className="Chat infoExit">
                 <div className="Chat restart">
-                  <a onClick={restartPage}>
+                  <a onClick={refreshPage}>
                     <span className="material-icons Chat btn">
                       restart_alt
                     </span>             
