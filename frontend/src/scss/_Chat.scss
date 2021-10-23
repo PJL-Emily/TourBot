@@ -43,10 +43,14 @@
         height: 92%;
     }
 
+    .inputForm{
+        height: 5%;
+    }
+
     .inputbox {
         width: 80%;
         text-align: left;
-        height: 5%;
+        height: 100%;
         border: none;
         border-radius: 10px 0px 0px 10px;
         background-color: #f4f4f4;
@@ -54,7 +58,7 @@
 
     .sendbtn{
         width: 10%;
-        height: 5%;
+        height: 100%;
         border: none;
         background-color: $red;
         color: white;

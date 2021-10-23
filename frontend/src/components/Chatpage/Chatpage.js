@@ -3,21 +3,27 @@ import 'antd/dist/antd.css';
 import '../../scss/main.scss';
 // import MaterialIcon, {colorPalette} from 'material-icons-react';
 import { Link, Redirect } from 'react-router-dom';
+import AuthService from "../../services/auth.service";
+import React, { useState } from 'react';
+import MessageList from './MessageList';
+import UserInput from './UserInput';
 
 function Chatpage (props) {
   // console.log('in chatpage, user_id: ', user_id);
 
-  // TRY Refresh
-  function refreshPage() {
+  // TRY Restart
+  function restartPage() {
+    const onRestart = (values) => {
+      AuthService.restart()
+    }
+
     window.location.reload(false);
   }
-  // TRY Exit
-  function exitPage() {
-    // console.log('in chatpage');
-    return (
-      <Redirect to=".." />
-    );
-  }
+  
+  // Try Exit
+
+  // Handle Input
+  const [state = useState(0);]
 
   return (
 
@@ -27,10 +33,12 @@ function Chatpage (props) {
           <div className="Chat mainroom">
             <div className="Chat dialogue">
               <div className="Chat chatbox">
-
+                {/* <MessageList threads={threads} index={currentIndex} /> */}
               </div>
-              <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..."></input>
-              <input className="Chat sendbtn" type="submit" id="usrsend" name="usrsend" value="傳送"></input>
+              <form className="Chat inputForm">
+                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..."></input>
+                <button className="Chat sendbtn" type="submit" id="usrsend" name="usrsend">傳送</button>
+              </form>
             </div>
             <div className="Chat inform">
               <img src={logo} className="Chat logo" alt="logo" />
@@ -72,7 +80,7 @@ function Chatpage (props) {
               </div>
               <div className="Chat infoExit">
                 <div className="Chat restart">
-                  <a onClick={refreshPage}>
+                  <a onClick={restartPage}>
                     <span className="material-icons Chat btn">
                       restart_alt
                     </span>             
