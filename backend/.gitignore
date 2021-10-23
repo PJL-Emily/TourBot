@@ -3,6 +3,8 @@ Pipfile.*
 results*
 pyproject.toml
 
+*.env
+
 *.pyc
 __pycache__
 
