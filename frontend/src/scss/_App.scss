@@ -29,8 +29,8 @@
     text-decoration: none;
 
     &:hover {
+      @include transition-1;
       cursor: pointer;
-      transition: 0.2s;
     }
   }
 }

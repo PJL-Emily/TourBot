@@ -24,6 +24,68 @@ function Chatpage (props) {
 
   // Handle Input
   const [state = useState(0);]
+import { useIdleTimer } from 'react-idle-timer';
+import { Link, useHistory } from 'react-router-dom';
+import ViewState from './ViewState';
+import ViewItem from './Swiper';
+import AuthService from "../../services/auth.service";
+
+function Chatpage () {
+  const history = useHistory();
+  function navigateToHome () {
+    history.push("/");
+  };
+  function refreshPage () {
+    let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
+    if (window.confirm(msg)) {
+      AuthService.restart()
+      .then(() => {
+        window.location.reload(false);
+      })
+      .catch((err) => {
+          console.log(err);
+      }); 
+    }
+  }
+  function exitPage (event) {
+    let msg = "您確定要離開聊天室嗎？\n所有聊天記錄將被清空，您將需要重新填寫個人資訊";
+    if (window.confirm(msg)) {
+      AuthService.exit()
+      .catch((err) => {
+        console.log(err);
+      });
+    }
+    else {
+      event.preventDefault();
+    }
+  }
+
+  const handleOnIdle = () => {
+    console.log('user is idle');
+    window.alert('您已閒置過久，將自動導入首頁重新進入聊天');
+    // TODO: how to force close modal?
+    // in restart/exit confirm window, idle timer does not work
+    console.log('last active', getLastActiveTime());
+    AuthService.exit()
+    .catch((err) => {
+      console.log(err);
+    });
+    navigateToHome();
+  }
+  const handleOnActive = () => {
+    console.log('user is active');
+    console.log('time remaining', getRemainingTime());
+  };
+  const handleOnAction = () => {
+    console.log('user did something');
+  };
+  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+    timeout: 1000 * 30 * 1, // idle time: 30 min
+    onIdle: handleOnIdle,
+    onActive: handleOnActive,
+    onAction: handleOnAction,
+    debounce: 500
+  });
 
   return (
 
@@ -45,38 +107,10 @@ function Chatpage (props) {
               <h2>TourBot</h2>
               <h3>很高興為您服務！</h3>
               <div className="Chat infoFunction">
-                <a href="#" className="info-btn preview-btn">
-                  <span className="material-icons Chat btn">
-                    preview
-                  </span>
-                  <span>
-                    檢視
-                  </span>
-                </a>
-                <a href="#" className="info-btn bed-btn">
-                  <span className="material-icons Chat btn">
-                    bed
-                  </span>
-                  <span>
-                    酒店
-                  </span>
-                </a>
-                <a href="#" className="info-btn museum-btn">
-                  <span className="material-icons Chat btn">
-                    museum
-                  </span>
-                  <span>
-                    景點
-                  </span>                
-                </a>
-                <a href="#" className="info-btn restaurant-btn">
-                  <span className="material-icons Chat btn">
-                    restaurant_menu
-                  </span>
-                  <span>
-                    餐廳
-                  </span>              
-                </a>
+                <ViewState />
+                <ViewItem type="酒店" />
+                <ViewItem type="景點" />
+                <ViewItem type="餐廳" />
               </div>
               <div className="Chat infoExit">
                 <div className="Chat restart">
@@ -88,7 +122,7 @@ function Chatpage (props) {
                   </a>
                 </div>
                 <div className="Chat leave">
-                  <Link to="/">
+                  <Link to="/" onClick={exitPage}>
                     <span className="material-icons Chat btn">
                       logout
                     </span>            

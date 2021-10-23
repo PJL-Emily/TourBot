@@ -2,6 +2,7 @@ import api from "./api";
 import TokenService from "./token.service";
 
 const submitUserInfo = async (purpose, gender, age) => {
+    // TODO: remove try catch
     const response = await api
         .post("submitUserInfo", {
             purpose: purpose,
@@ -15,37 +16,52 @@ const submitUserInfo = async (purpose, gender, age) => {
 };
 
 const restart = async () => {
-    try {
-        const res = await api
-            .post("restartSession", {
-                // user_id: user_id,
-                // stat: 'restart'
-            });
-        console.log(res);
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    const res = await api
+        .post("restartSession", {});
+    console.log(res);
 };
 
 const exit = async () => {
-    try {
-        await api
-            .post("exit", {
-                // user_id: user_id,
-                // stat: 'exit'
-            });
-        TokenService.removeUser();
-    } 
-    catch (err) {
-        console.log(err);
-    }
+    await api.post("exit", {});
+    TokenService.removeUser();
+};
+
+const getUserState = async () => {
+    const response = await api
+        .get("getUserState", {});
+    
+    return response.data;
+};
+
+const getHotelInfo = async () => {
+    const response = await api
+        .get("getHotelInfo", {});
+
+    return response.data;
+};
+
+const getSiteInfo = async () => {
+    const response = await api
+        .get("getSiteInfo", {});
+
+    return response.data;
+};
+
+const getRestInfo = async () => {
+    const response = await api
+        .get("getRestInfo", {});
+
+    return response.data;
 };
 
 const AuthService = {
     submitUserInfo,
     restart,
-    exit
+    exit,
+    getUserState,
+    getHotelInfo,
+    getSiteInfo,
+    getRestInfo
 };
   
 export default AuthService;

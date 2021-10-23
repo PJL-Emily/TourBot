@@ -13,9 +13,8 @@ class RuleDST(DST):
         state(dict):
             Dialog state. Function ``convlab2.util.crosswoz.state.default_state`` returns a default state.
     """
-    def __init__(self, current_state=default_state()):
+    def __init__(self):
         super().__init__()
-        self.state = current_state
         self.database = Database()
 
     def init_session(self, state=None):

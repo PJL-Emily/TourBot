@@ -53,7 +53,7 @@
         height: 100%;
         border: none;
         border-radius: 10px 0px 0px 10px;
-        background-color: #f4f4f4;
+        background-color: $gray-lighter;
     }
 
     .sendbtn{
@@ -78,7 +78,7 @@
     background: $wheat;
     display: flex;
     flex-direction: column;
-    justify-content: end;
+    justify-content: flex-end;
     padding-bottom: 30px;
     h2 {
         font-size: $medium;
@@ -123,6 +123,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            outline: none;
+            border: none;
+            @include transition-2;
+
+            &:hover {
+                cursor: pointer;
+            }
 
             span {
                 text-align: center;
@@ -132,15 +139,31 @@
         }
         .preview-btn{
             background-color: $orange;
+
+            &:hover {
+                background-color: $orange-darker;
+            }
         }
         .bed-btn{
             background-color: $yellow;
+
+            &:hover {
+                background-color: $yellow-darker;
+            }
         }
         .museum-btn{
             background-color: $aqua;
+
+            &:hover {
+                background-color: $aqua-darker;
+            }
         }
         .restaurant-btn{
             background-color: $navy;
+
+            &:hover {
+                background-color: $navy-darker;
+            }
         }
     }
 
@@ -159,13 +182,35 @@
             width: 30%;
             margin: 0;
 
+            .material-icons:hover {
+                font-weight: bold;
+                @include transition-1;
+            }
+
             a {
                 color: $red;
-                font-weight: bold;
+                @include transition-1;
             }
             a:hover {
                 font-weight: bold;
             }
         }
+    }
+}
+
+.state-list {
+    font-size: $medium-font;
+    line-height: 2.5;
+
+    .material-icons {
+        color: $red;
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+    li {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 }
