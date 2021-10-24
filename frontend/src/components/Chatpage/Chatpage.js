@@ -1,6 +1,9 @@
 import logo from '../../img/logo.png';
 import 'antd/dist/antd.css';
 import '../../scss/main.scss';
+import React, { useState } from 'react';
+import MessageList from './MessageList';
+import UserInput from './UserInput';
 import { useIdleTimer } from 'react-idle-timer';
 import { Link, useHistory } from 'react-router-dom';
 import ViewState from './ViewState';
@@ -59,24 +62,68 @@ function Chatpage () {
     // TODO: refresh token
   };
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
-    timeout: 1000 * 30 * 1, // idle time: 30 min
+    timeout: 1000 * 60 * 30 * 1, // idle time: 30 min
     onIdle: handleOnIdle,
     onActive: handleOnActive,
     onAction: handleOnAction,
     debounce: 500
   });
 
+  const handleMessageChange = (event) => {
+    console.log("event123: ",event)
+    setNewMessage(event.target.value);
+    console.log("Set State after message change =>", newMessage)
+  }
+  const handleKeyDown = (event) => {
+    const message = event.target.value;
+    console.log("message: ",message)
+    console.log("event: ",event)
+    const time = new Date().toDateString();
+    console.log("time: ",time)
+    const addMessage = {fromMe: true, text: message, time: time};
+    console.log("addMessage: ",addMessage)
+
+    if (event.keyCode === 13 && message !== '') {
+
+      setThreads((threads) =>
+      [...threads, addMessage]
+      );
+      setNewMessage('');
+    }
+  }
+
+  // Handle Input
+  const [newMessage, setNewMessage] = React.useState('')
+  const [threads, setThreads] = React.useState(
+    [
+      {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
+    ]
+  )
+
+  console.log("Initial State before return =>", threads, " & New message =>", newMessage)
+
   return (
 
     <div className="App chatpage">
         <div className="Chat header">
-          {/* <h1>Chatpage {props.user_id}</h1> */}
           <div className="Chat mainroom">
             <div className="Chat dialogue">
               <div className="Chat chatbox">
+                <div className="message-list">
+                  <MessageList threads={threads}/>
+                </div>
               </div>
-              <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..."></input>
-              <input className="Chat sendbtn" type="submit" id="usrsend" name="usrsend" value="傳送"></input>
+              {/* <div className="Chat inputForm">
+                <UserInput
+                  newMessage={newMessage}
+                  messageChange={handleMessageChange}
+                  handleKeyDown={handleKeyDown}
+                />
+              </div> */}
+              <div className="Chat inputForm">
+                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
+                <button className="Chat sendbtn" type="submit" id="usrsend" name="usrsend">傳送</button>
+              </div>
             </div>
             <div className="Chat inform">
               <img src={logo} className="Chat logo" alt="logo" />

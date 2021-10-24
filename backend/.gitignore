@@ -3,6 +3,8 @@ Pipfile.*
 results*
 pyproject.toml
 
+*.env
+
 *.pyc
 __pycache__
 
@@ -90,3 +92,5 @@ pre-trained-models/
 
 # orgin setup
 setup_origin.py
+
+.env
