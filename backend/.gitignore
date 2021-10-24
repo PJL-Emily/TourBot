@@ -92,3 +92,5 @@ pre-trained-models/
 
 # orgin setup
 setup_origin.py
+
+.env
