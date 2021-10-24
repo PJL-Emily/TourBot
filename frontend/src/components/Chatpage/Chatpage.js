@@ -5,7 +5,8 @@ import { useIdleTimer } from 'react-idle-timer';
 import { Link, useHistory } from 'react-router-dom';
 import ViewState from './ViewState';
 import ViewItem from './Swiper';
-import AuthService from "../../services/auth.service";
+import Service from "../../services/service";
+
 
 function Chatpage () {
   const history = useHistory();
@@ -15,19 +16,19 @@ function Chatpage () {
   function refreshPage () {
     let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
     if (window.confirm(msg)) {
-      AuthService.restart()
+      Service.restart()
       .then(() => {
         window.location.reload(false);
       })
       .catch((err) => {
           console.log(err);
-      }); 
+      });
     }
   }
   function exitPage (event) {
     let msg = "您確定要離開聊天室嗎？\n所有聊天記錄將被清空，您將需要重新填寫個人資訊";
     if (window.confirm(msg)) {
-      AuthService.exit()
+      Service.exit()
       .catch((err) => {
         console.log(err);
       });
@@ -43,7 +44,7 @@ function Chatpage () {
     // TODO: how to force close modal?
     // in restart/exit confirm window, idle timer does not work
     console.log('last active', getLastActiveTime());
-    AuthService.exit()
+    Service.exit()
     .catch((err) => {
       console.log(err);
     });
@@ -55,6 +56,7 @@ function Chatpage () {
   };
   const handleOnAction = () => {
     console.log('user did something');
+    // TODO: refresh token
   };
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 30 * 1, // idle time: 30 min
