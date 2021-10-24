@@ -7,7 +7,7 @@ load_dotenv(path.join(basedir, '.env'))
 
 class Config:
 	USE_RELOADER = True
-	MONGO_URI = os.environ.get('MONGO_URI')
+	MONGO_URI = environ.get('MONGO_URI')
 			 
 	@classmethod
 	def init_app(cls, app):
