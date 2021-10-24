@@ -10,17 +10,15 @@ export default class MessageList extends Component {
   }
 
   render() {
-    // const { threads, index } = this.props;
-    const threads = this.props.threads
-    const index = this.props.index
-    console.log(threads);
-    console.log(index);
-    console.log(threads[index]);
-    console.log(threads[index].messages[0])
-    const messages = threads[index].messages;
+    const { threads} = this.props;
+    // const threads = this.props.threads
+    // const index = this.props.index
+    console.log("threads: ", threads);
+    console.log("threads[0]: ", threads[0]);
+    // const messages = threads.messages;
     return (
       <div>
-        {messages.map((message, id) => {
+        {threads.map((message, id) => {
           return (
             <MessageItem key={id}
                          fromMe={message.fromMe}
