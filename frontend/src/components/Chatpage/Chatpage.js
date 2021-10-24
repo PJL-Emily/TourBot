@@ -67,64 +67,59 @@ function Chatpage () {
     debounce: 500
   });
 
-  function handleMessageChange(event) {
-    setState({ currentIndex: event});
+  const handleMessageChange = (event) => {
+    console.log("event123: ",event)
+    setNewMessage(event.target.value);
+    console.log("Set State after message change =>", newMessage)
   }
-  function handleKeyDown(event) {
+  const handleKeyDown = (event) => {
     const message = event.target.value;
+    console.log("message: ",message)
+    console.log("event: ",event)
     const time = new Date().toDateString();
+    console.log("time: ",time)
     const addMessage = {fromMe: true, text: message, time: time};
+    console.log("addMessage: ",addMessage)
 
     if (event.keyCode === 13 && message !== '') {
-      const {threads, currentIndex} = initialState;
-      threads[currentIndex].messages.push(addMessage);
 
-      setState({
-        newMessage: '',
-        threads: threads
-      });
+      setThreads((threads) =>
+      [...threads, addMessage]
+      );
+      setNewMessage('');
     }
   }
 
   // Handle Input
-  const [initialState, setState] = React.useState({
-    newMessage:'',
-    threads: [
-      {
-        target:{
-          name:'System',
-        },
-        messages: [
-          {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
-        ]
-      }
-    ],
-    currentIndex: 0
-  })
+  const [newMessage, setNewMessage] = React.useState('')
+  const [threads, setThreads] = React.useState(
+    [
+      {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
+    ]
+  )
 
-
+  console.log("Initial State before return =>", threads, " & New message =>", newMessage)
 
   return (
 
     <div className="App chatpage">
         <div className="Chat header">
-          {/* <h1>Chatpage {props.user_id}</h1> */}
           <div className="Chat mainroom">
             <div className="Chat dialogue">
               <div className="Chat chatbox">
                 <div className="message-list">
-                  <MessageList threads={initialState.threads} index={initialState.currentIndex} />
+                  <MessageList threads={threads}/>
                 </div>
               </div>
               {/* <div className="Chat inputForm">
                 <UserInput
-                  newMessage={initialState.newMessage}
+                  newMessage={newMessage}
                   messageChange={handleMessageChange}
                   handleKeyDown={handleKeyDown}
                 />
               </div> */}
               <div className="Chat inputForm">
-                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={initialState.newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
+                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
                 <button className="Chat sendbtn" type="submit" id="usrsend" name="usrsend">傳送</button>
               </div>
             </div>

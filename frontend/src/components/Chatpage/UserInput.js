@@ -12,9 +12,12 @@ export default class UserInput extends Component {
     const { newMessage, messageChange, handleKeyDown} = this.props;
     return (
       <input className="new-message"
-             value={newMessage}
-             onChange={messageChange}
-             onKeyDown={handleKeyDown} />
+        value={newMessage}
+        onChangeCapture={messageChange}
+        // onChange={ () =>{console.log("onChange event"); }}
+        onKeyDown={handleKeyDown} 
+        // onKeyUp={() => { console.log("key up event"); }}
+      />
     );
   }
 }

@@ -54,6 +54,11 @@ const getRestInfo = async () => {
     return response.data;
 };
 
+// const sendUserUtter = async () => {
+//     const response = await api
+
+// }
+
 const AuthService = {
     submitUserInfo,
     restart,
