@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask.json import JSONEncoder
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from bson import json_util
 from config import Config
 import os
@@ -15,56 +14,11 @@ class MongoJSONEncoder(JSONEncoder):
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config["JWT_SECRET_KEY"] = "super-secret"
-# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
-# app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 app.json_encoder = MongoJSONEncoder
 Config.init_app(app)
 mongo = PyMongo(app)
 db = mongo.TourBot
 app.run()
-jwt = JWTManager(app)
-
-def tokenValid(token):
-    # check validation by JWT
-    return True
-
-#post /senUserUtter/<token> data: {token :}/<msg> data: {msg :}
-@app.route('/store/<string:token>/<string: msg>' , methods=['POST'])
-def sendMsg2Pipeline(token, msg):
-    return 
-
-#post /restartSession/<token> data: {token :}
-@app.route('/restartSession/<string:token>' , methods=['POST'])
-def restartSession(token):
-    # validate token
-    isValid = tokenValid(token)
-    if (not isValid):
-        return "token expired."
-    # update user state
-    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-    if (result == 1):
-        return "ok"
-    else:
-        return "update failed."
-
-#post /exit/<token> data: {token :}
-@app.route('/exit/<string:token>' , methods=['POST'])
-def exit(token):
-    # validate token
-    isValid = tokenValid(token)
-    if (not isValid):
-        return "token expired."
-    # update user state
-    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-    if (result == 1):
-        return "ok"
-    else:
-        return "failed to exit."
-
-@jwt.expired_token_loader
-def expiredTokenCallback(jwt_header, jwt_payload):
-    return jsonify(message="token expired."), 401
 
 @app.route('/protected', methods=['GET', 'POST'])
 @jwt_required()
@@ -139,9 +93,31 @@ def getRestInfo():
     except BulkWriteError as e:
         return jsonify({'message':'Failed to get rest info.'}), 400
 
-@app.route("/")
-def hello():
-    return "Hello World!"
+
+@app.route('/sendUserUtter' , methods=['POST'])
+def sendMsg2Pipeline():
+    user_id = request.get_json(force=True)['user_id']
+    result = db.users.find_one({ "_id": user_id })
+    if (not result):
+        return jsonify({'message':'User not found.'}), 400
+    # send message to pipeline
+    # get returned utter
+    sys_utter = "reply from pipeline. "
+    return jsonify({'message':'ok', 'data': sys_utter}), 200
+
+@app.route('/restartSession' , methods=['POST'])
+def restartSession():
+    user_id = request.get_json(force=True)['user_id']
+    result = db.users.find_one({ "_id": user_id })
+    if (not result):
+        return jsonify({'message':'User not found.'}), 400
+    
+    # clear user state
+    result = db.users.update_one({ "_id": user_id }, { "$set": { "state": {} } })
+    if (result == 1):
+        return jsonify({'message':'ok'}), 200
+    else:
+        return jsonify({'message':'update failed.'}), 400
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
