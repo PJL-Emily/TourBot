@@ -1,14 +1,12 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask.json import JSONEncoder
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from bson import json_util
 from config import Config
 import pymongo
 import os
 from dotenv import load_dotenv
-from googlesearch import search
-
+from serpapi import GoogleSearch
 
 class MongoJSONEncoder(JSONEncoder):
     def default(self, obj): 
@@ -16,62 +14,81 @@ class MongoJSONEncoder(JSONEncoder):
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config["JWT_SECRET_KEY"] = "super-secret"
-# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
-# app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 app.json_encoder = MongoJSONEncoder
 load_dotenv()
 MONGO_URI = os.getenv('MONGO_URI')
 client = pymongo.MongoClient(MONGO_URI)
 db = client.TourBot
-jwt = JWTManager(app)
 
-def tokenValid(token):
-    # check validation by JWT
-    return True
+def googleSearchLink(query):
+    try:
+        params = {
+            "q": query,
+            "api_key": os.getenv('API_KEY'),
+            "location": "Beijing,China",
+            "num": 4
+        }
+        search = GoogleSearch(params)
+        results = search.get_dict()
+        links = []
+        for result in results["organic_results"]:
+            item = {
+              "text": result['title'],
+              "url": result['link']
+            }
+            links.append(item)
+            if(len(links) == 3) :
+                break
+        return links
+    except:
+        print("No page found.")
 
-#post /senUserUtter/<token> data: {token :}/<msg> data: {msg :}
-# @app.route('/store/<string:token>/<string: msg>' , methods=['POST'])
-# def sendMsg2Pipeline(token, msg):
-#     return 
+def googleSearchImg(query):
+    try:
+        params = {
+            "q": query,
+            "api_key": os.getenv('API_KEY'),
+            "tbm": "isch",
+            "num": 1
+        }
+        search = GoogleSearch(params)
+        results = search.get_dict()
+        return results['images_results'][0]["original"]
+    except:
+        print("No image found.")
 
-#post /restartSession/<token> data: {token :}
-# @app.route('/restartSession/<string:token>' , methods=['POST'])
-# def restartSession(token):
-#     # validate token
-#     isValid = tokenValid(token)
-#     if (not isValid):
-#         return "token expired."
-#     # update user state
-#     result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-#     if (result == 1):
-#         return "ok"
-#     else:
-#         return "update failed."
+# post /senUserUtter/<token> data: {token :}/<msg> data: {msg :}
+@app.route('/store/<string:token>/<string: msg>' , methods=['POST'])
+def sendMsg2Pipeline(token, msg):
+    return 
 
-#post /exit/<token> data: {token :}
-# @app.route('/exit/<string:token>' , methods=['POST'])
-# def exit(token):
-#     # validate token
-#     isValid = tokenValid(token)
-#     if (not isValid):
-#         return "token expired."
-#     # update user state
-#     result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-#     if (result == 1):
-#         return "ok"
-#     else:
-#         return "failed to exit."
+# post /restartSession/<token> data: {token :}
+@app.route('/restartSession/<string:token>' , methods=['POST'])
+def restartSession(token):
+    # validate token
+    isValid = tokenValid(token)
+    if (not isValid):
+        return "token expired."
+    # update user state
+    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
+    if (result == 1):
+        return "ok"
+    else:
+        return "update failed."
 
-@jwt.expired_token_loader
-def expiredTokenCallback(jwt_header, jwt_payload):
-    return jsonify(message="token expired."), 401
-
-@app.route('/protected', methods=['GET', 'POST'])
-@jwt_required()
-def protected(): 
-    identity = get_jwt_identity()
-    return jsonify(msg='ok'), 200
+# post /exit/<token> data: {token :}
+@app.route('/exit/<string:token>' , methods=['POST'])
+def exit(token):
+    # validate token
+    isValid = tokenValid(token)
+    if (not isValid):
+        return "token expired."
+    # update user state
+    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
+    if (result == 1):
+        return "ok"
+    else:
+        return "failed to exit."
 
 @app.route('/submitUserInfo', methods=['POST'])
 def submitUserInfo():
@@ -82,36 +99,28 @@ def submitUserInfo():
             'gender':userInfo['gender'],
             'age':userInfo['age']
         }
-        new_user = db.users.insert_one(user_dict).inserted_id
-
-        # create jwt token
-        accesstoken = create_access_token(identity=new_user)
-        return jsonify({'message':'ok', 'data':{'accesstoken': accesstoken}}), 200
+        new_user = db.users.insert(user_dict)
+        return jsonify({'message':'ok', 'data':{'user_id': str(new_user)}}), 200
     except:
         return jsonify({'message':'Failed to submit user info.'}), 400
 
 @app.route('/getUserState', methods=['GET'])
-@jwt_required()
 def getUserState():
     try:
-        token = request.get_json()['token']
-        user = db.users.find({"token": token})
-        state = db.states.find({"user_id": user._id.str})
+        user_id = request.get_json(force=True) ["user_id"]
+        state = db.states.find({"user_id": user_id})
         if state is None :
             return jsonify({'message':'State not exists.'}), 400
         return jsonify({'message':'ok', 'data': state}), 200
-    except BulkWriteError as e:
+    except:
         return jsonify({'message':'Failed to get user state.'}), 400
 
 @app.route('/getHotelInfo', methods=['GET'])
-@jwt_required()
 def getHotelInfo():
     try:
         # query by state
-        # token = request.get_json()['token']
-        # user = db.users.findOne({"token": token})
-        # state = db.states.findOne({"user_id": user._id.str})
-        # hotel = db.hotels.findOne({"name": state.hotel})
+        # state = db.states.findOne({"user_id": user_id})
+        # name = state.hotel
 
         # query by hotel name
         name = request.get_json(force=True)['hotel']
@@ -120,23 +129,21 @@ def getHotelInfo():
         if hotel is None :
             return jsonify({'message':'Hotel name not exists.'}), 400
 
-        # Todo: google search result
-        query = name
-        for j in search(query, tld="co.in", num=3, stop=3, pause=2):
-            print(j)
+        # google search result
+        links = googleSearchLink(name)
+        img = googleSearchImg(name)
+        hotel.update({"img": img, "search_results":links})
 
         return jsonify({'message':'ok', "data": hotel}), 200
     except:
         return jsonify({'message':'Failed to get hotel info.'}), 400
 
 @app.route('/getSiteInfo', methods=['GET'])
-@jwt_required()
 def getSiteInfo():
     try:
         # query by state
-        # user = db.users.findOne({"token": token})
-        # state = db.states.findOne({"user_id": user._id.str})
-        # site = db.sites.findOne({"name": state.site})
+        # state = db.states.findOne({"user_id": user_id})
+        # name = state.site
 
         # query by site name
         name = request.get_json(force=True)['site']
@@ -145,19 +152,21 @@ def getSiteInfo():
         if site is None :
             return jsonify({'message':'Site name not exists.'}), 400
 
-        # Todo: google search result
+        # google search result
+        links = googleSearchLink(name)
+        img = googleSearchImg(name)
+        site.update({"img": img, "search_results":links})
+
         return jsonify({'message':'ok',  'data':site}), 200
     except:
         return jsonify({'message':'Failed to get site info.'}), 400
 
 @app.route('/getRestInfo', methods=['GET'])
-# @jwt_required()
 def getRestInfo():
     try:
         # query by state
-        # user = db.users.findOne({"token": token})
-        # state = db.states.findOne({"user_id": user._id.str})
-        # rest = db.rests.findOne({"name": state.rest}), 200
+        # state = db.states.findOne({"user_id": user_id})
+        # name = state.rest
 
         # query by rest name
         name = request.get_json(force=True)['rest']
@@ -166,15 +175,14 @@ def getRestInfo():
         if rest is None :
             return jsonify({'message':'Restaurant name not exists.'}), 400
 
-        # Todo: google search result
+        # google search result
+        links = googleSearchLink(name)
+        img = googleSearchImg(name)
+        rest.update({"img": img, "search_results":links})
+
         return jsonify({'message':'ok',  'data':rest}), 200
     except:
         return jsonify({'message':'Failed to get rest info.'}), 400
-
-
-@app.route("/")
-def hello():
-    return "Hello World!"
 
 if __name__ == '__main__':
     app.run()
