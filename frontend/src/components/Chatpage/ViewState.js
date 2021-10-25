@@ -2,10 +2,10 @@ import 'antd/dist/antd.css';
 import '../../scss/main.scss';
 import { useState } from 'react';
 import { Modal } from 'antd';
-import AuthService from "../../services/auth.service";
+import Service from "../../services/service";
 
 function StateModal () {
-    AuthService.getUserState()
+    Service.getUserState()
     .then((data) => {
         console.log('Response data: ', data);
         const state = data;

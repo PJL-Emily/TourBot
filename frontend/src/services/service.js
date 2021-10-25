@@ -2,64 +2,76 @@ import api from "./api";
 import TokenService from "./token.service";
 
 const submitUserInfo = async (purpose, gender, age) => {
-    // TODO: remove try catch
     const response = await api
         .post("submitUserInfo", {
             purpose: purpose,
             gender: gender,
             age: age
         });
-    if (response.data.accessToken) {
-        TokenService.setUser(response.data);
+    if (response.data.user_id) {
+        TokenService.setUser(response.data); ///
     }
     return response.data;
 };
 
 const restart = async () => {
+    // var data = { user_id: TokenService.getUser().user_id };
+    var data = { user_id: "test_id" };
+
     const res = await api
-        .post("restartSession", {});
+        .post("restartSession", data);
     console.log(res);
 };
 
 const exit = async () => {
-    await api.post("exit", {});
+    // var data = { user_id: TokenService.getUser().user_id };
+    var data = { user_id: "test_id" };
+
+    await api.post("exit", data);
     TokenService.removeUser();
 };
 
 const getUserState = async () => {
+    // var data = { user_id: TokenService.getUser().user_id };
+    var data = { user_id: "test_id" };
+
     const response = await api
-        .get("getUserState", {});
+        .get("getUserState", data);
     
     return response.data;
 };
 
 const getHotelInfo = async () => {
+    // var data = { user_id: TokenService.getUser().user_id };
+    var data = { user_id: "test_id" };
+
     const response = await api
-        .get("getHotelInfo", {});
+        .get("getHotelInfo", data);
 
     return response.data;
 };
 
 const getSiteInfo = async () => {
+    // var data = { user_id: TokenService.getUser().user_id };
+    var data = { user_id: "test_id" };
+
     const response = await api
-        .get("getSiteInfo", {});
+        .get("getSiteInfo", data);
 
     return response.data;
 };
 
 const getRestInfo = async () => {
+    // var data = { user_id: TokenService.getUser().user_id };
+    var data = { user_id: "test_id" };
+
     const response = await api
-        .get("getRestInfo", {});
+        .get("getRestInfo", data);
 
     return response.data;
 };
 
-// const sendUserUtter = async () => {
-//     const response = await api
-
-// }
-
-const AuthService = {
+const Service = {
     submitUserInfo,
     restart,
     exit,
@@ -69,4 +81,4 @@ const AuthService = {
     getRestInfo
 };
   
-export default AuthService;
+export default Service;

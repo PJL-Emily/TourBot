@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal } from 'antd';
 import SwiperCore, { Navigation, Pagination, Scrollbar } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import AuthService from "../../services/auth.service";
+import Service from "../../services/service";
 import InfoCard from './SlideCard';
 import 'swiper/swiper.scss';
 import "swiper/components/pagination/pagination.scss";
@@ -13,9 +13,9 @@ SwiperCore.use([ Navigation, Pagination, Scrollbar ]);
 
 const ItemSwiper = ({ type }) => {
   const func_dict = {
-    "酒店": AuthService.getHotelInfo,
-    "景點": AuthService.getSiteInfo,
-    "餐廳": AuthService.getRestInfo
+    "酒店": Service.getHotelInfo,
+    "景點": Service.getSiteInfo,
+    "餐廳": Service.getRestInfo
 };
 var values = func_dict[type]()
     .then(data => {

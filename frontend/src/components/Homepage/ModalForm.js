@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Button, Modal, Form, Radio } from 'antd';
-import AuthService from "../../services/auth.service";
+import Service from "../../services/service";
 import '../../scss/main.scss';
 
 const CollectionCreateForm = ({ visible, onCreate, onCancel }) => {
@@ -93,7 +93,7 @@ const CollectionsPage = ({ setUserID }) => {
   const [redirect, setRedirect] = useState(false);
 
   const onCreate = (values) => {
-    AuthService.submitUserInfo(values.purpose, values.gender, values.age)
+    Service.submitUserInfo(values.purpose, values.gender, values.age)
     .then(data => {
         console.log('Received values of form: ', values);
         console.log('Response data: ', data);
