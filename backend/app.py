@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask.json import JSONEncoder
+from flask_cors import CORS
 from bson import json_util
 from config import Config
 import pymongo
@@ -14,6 +15,7 @@ class MongoJSONEncoder(JSONEncoder):
         return json_util.default(obj)
 
 app = Flask(__name__)
+cors = CORS(app)
 app.json_encoder = MongoJSONEncoder
 load_dotenv()
 MONGO_URI = os.getenv('MONGO_URI')
@@ -161,12 +163,30 @@ def sendMsg2Pipeline():
     result = db.users.find_one({ "_id": user_id })
     if (not result):
         return jsonify({'message':'User not found.'}), 400
-    
+        
     # pipeline
     current_state = None # todo: get previous state from db
     sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(utterance, current_state = current_state)
+    # store state in db
+
+    data = {}
+    data['utter'] = sys_utter
+    if taxi['出发地'] != "":
+        data['taxi'] = False
+    else:
+        data['taxi'] = True
+    if restaurant == "":
+        data['rest'] = False
+    else:
+        data['rest'] = True
+    for domain in ['hotel', 'site']:
+        if exec(domain) == "":
+            data[domain] = False
+        else:
+            data[domain] = True
+    
     # todo: save state and data to db
-    return jsonify({'message':'ok', 'data': sys_utter}), 200
+    return jsonify({'message':'ok', 'data': data}), 200
 
 @app.route('/restartSession' , methods=['POST'])
 def restartSession():
