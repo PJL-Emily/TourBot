@@ -7,18 +7,21 @@ import pymongo
 import os
 from dotenv import load_dotenv
 from serpapi import GoogleSearch
+from convlab2.dialog_agent.pipeline import Pipeline
 
 class MongoJSONEncoder(JSONEncoder):
     def default(self, obj): 
         return json_util.default(obj)
 
 app = Flask(__name__)
-app.config.from_object(Config)
 app.json_encoder = MongoJSONEncoder
 load_dotenv()
 MONGO_URI = os.getenv('MONGO_URI')
 client = pymongo.MongoClient(MONGO_URI)
 db = client.TourBot
+
+# initial pipeline model
+pipeline = Pipeline()
 
 def googleSearchLink(query):
     try:
@@ -57,38 +60,6 @@ def googleSearchImg(query):
     except:
         print("No image found.")
 
-# post /senUserUtter/<token> data: {token :}/<msg> data: {msg :}
-@app.route('/store/<string:token>/<string: msg>' , methods=['POST'])
-def sendMsg2Pipeline(token, msg):
-    return 
-
-# post /restartSession/<token> data: {token :}
-@app.route('/restartSession/<string:token>' , methods=['POST'])
-def restartSession(token):
-    # validate token
-    isValid = tokenValid(token)
-    if (not isValid):
-        return "token expired."
-    # update user state
-    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-    if (result == 1):
-        return "ok"
-    else:
-        return "update failed."
-
-# post /exit/<token> data: {token :}
-@app.route('/exit/<string:token>' , methods=['POST'])
-def exit(token):
-    # validate token
-    isValid = tokenValid(token)
-    if (not isValid):
-        return "token expired."
-    # update user state
-    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-    if (result == 1):
-        return "ok"
-    else:
-        return "failed to exit."
 
 @app.route('/submitUserInfo', methods=['POST'])
 def submitUserInfo():
@@ -183,6 +154,33 @@ def getRestInfo():
         return jsonify({'message':'ok',  'data':rest}), 200
     except:
         return jsonify({'message':'Failed to get rest info.'}), 400
+
+@app.route('/sendUserUtter' , methods=['POST'])
+def sendMsg2Pipeline():
+    user_id = request.get_json(force=True)['user_id']
+    result = db.users.find_one({ "_id": user_id })
+    if (not result):
+        return jsonify({'message':'User not found.'}), 400
+    
+    # pipeline
+    current_state = None # todo: get previous state from db
+    sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(utterance, current_state = current_state)
+    # todo: save state and data to db
+    return jsonify({'message':'ok', 'data': sys_utter}), 200
+
+@app.route('/restartSession' , methods=['POST'])
+def restartSession():
+    user_id = request.get_json(force=True)['user_id']
+    result = db.users.find_one({ "_id": user_id })
+    if (not result):
+        return jsonify({'message':'User not found.'}), 400
+    
+    # clear user state
+    result = db.users.update_one({ "_id": user_id }, { "$set": { "state": {} } })
+    if (result == 1):
+        return jsonify({'message':'ok'}), 200
+    else:
+        return jsonify({'message':'update failed.'}), 400
 
 if __name__ == '__main__':
     app.run()
