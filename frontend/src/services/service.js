@@ -18,9 +18,9 @@ const restart = async () => {
     // var data = { user_id: TokenService.getUser().user_id };
     var data = { user_id: "test_id" };
 
-    const res = await api
+    const response = await api
         .post("restartSession", data);
-    console.log(res);
+    console.log(response);
 
     return response.data;
 };
@@ -29,7 +29,7 @@ const exit = async () => {
     // var data = { user_id: TokenService.getUser().user_id };
     var data = { user_id: "test_id" };
 
-    await api.post("exit", data);
+    const response = await api.post("exit", data);
     TokenService.removeUser();
 
     return response.data;
