@@ -21,6 +21,8 @@ const restart = async () => {
     const res = await api
         .post("restartSession", data);
     console.log(res);
+
+    return response.data;
 };
 
 const exit = async () => {
@@ -29,6 +31,8 @@ const exit = async () => {
 
     await api.post("exit", data);
     TokenService.removeUser();
+
+    return response.data;
 };
 
 const getUserState = async () => {
