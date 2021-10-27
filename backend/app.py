@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask.json import JSONEncoder
+from flask_cors import CORS
 from bson import json_util
 from config import Config
 import pymongo
@@ -14,6 +15,7 @@ class MongoJSONEncoder(JSONEncoder):
         return json_util.default(obj)
 
 app = Flask(__name__)
+cors = CORS(app)
 app.json_encoder = MongoJSONEncoder
 load_dotenv()
 MONGO_URI = os.getenv('MONGO_URI')

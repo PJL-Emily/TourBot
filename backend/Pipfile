@@ -17,6 +17,7 @@ flask-pymongo = "*"
 python-dotenv = "*"
 pymongo = {extras = ["srv"], version = "*"}
 google-search-results = "*"
+flask-cors = "*"
 
 [dev-packages]
 
