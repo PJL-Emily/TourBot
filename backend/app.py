@@ -7,6 +7,7 @@ import pymongo
 import os
 from dotenv import load_dotenv
 from serpapi import GoogleSearch
+from convlab2.dialog_agent.pipeline import Pipeline
 
 class MongoJSONEncoder(JSONEncoder):
     def default(self, obj): 
@@ -18,6 +19,9 @@ load_dotenv()
 MONGO_URI = os.getenv('MONGO_URI')
 client = pymongo.MongoClient(MONGO_URI)
 db = client.TourBot
+
+# initial pipeline model
+pipeline = Pipeline()
 
 def googleSearchLink(query):
     try:
@@ -157,9 +161,11 @@ def sendMsg2Pipeline():
     result = db.users.find_one({ "_id": user_id })
     if (not result):
         return jsonify({'message':'User not found.'}), 400
-    # send message to pipeline
-    # get returned utter
-    sys_utter = "reply from pipeline. "
+    
+    # pipeline
+    current_state = None # todo: get previous state from db
+    sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(utterance, current_state = current_state)
+    # todo: save state and data to db
     return jsonify({'message':'ok', 'data': sys_utter}), 200
 
 @app.route('/restartSession' , methods=['POST'])
