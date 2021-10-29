@@ -8,15 +8,27 @@ const submitUserInfo = async (purpose, gender, age) => {
             gender: gender,
             age: age
         });
-    if (response.data.user_id) {
-        TokenService.setUser(response.data); ///
+    if (response.data.data.user_id) {
+        TokenService.setUser(response.data.data);
     }
     return response.data;
 };
 
+const sendUserUtter = async (utterance) => {
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
+
+    const response = await api
+        .post("sendUserUtter", {
+            ...data, msg: utterance
+        });
+
+    return response.data;
+};
+
 const restart = async () => {
-    // var data = { user_id: TokenService.getUser().user_id };
-    var data = { user_id: "test_id" };
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
 
     const response = await api
         .post("restartSession", data);
@@ -26,18 +38,20 @@ const restart = async () => {
 };
 
 const exit = async () => {
-    // var data = { user_id: TokenService.getUser().user_id };
-    var data = { user_id: "test_id" };
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
 
-    const response = await api.post("exit", data);
+    const response = await api
+        .post("exit", data);
     TokenService.removeUser();
 
     return response.data;
 };
 
 const getUserState = async () => {
-    // var data = { user_id: TokenService.getUser().user_id };
-    var data = { user_id: "test_id" };
+    var data = { user_id: TokenService.getUser().user_id };
+    console.log("data: ", data);
+    // var data = { user_id: "test_id" };
 
     const response = await api
         .get("getUserState", data);
@@ -46,8 +60,8 @@ const getUserState = async () => {
 };
 
 const getHotelInfo = async () => {
-    // var data = { user_id: TokenService.getUser().user_id };
-    var data = { user_id: "test_id" };
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
 
     const response = await api
         .get("getHotelInfo", data);
@@ -56,8 +70,8 @@ const getHotelInfo = async () => {
 };
 
 const getSiteInfo = async () => {
-    // var data = { user_id: TokenService.getUser().user_id };
-    var data = { user_id: "test_id" };
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
 
     const response = await api
         .get("getSiteInfo", data);
@@ -66,8 +80,8 @@ const getSiteInfo = async () => {
 };
 
 const getRestInfo = async () => {
-    // var data = { user_id: TokenService.getUser().user_id };
-    var data = { user_id: "test_id" };
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
 
     const response = await api
         .get("getRestInfo", data);
@@ -77,6 +91,7 @@ const getRestInfo = async () => {
 
 const Service = {
     submitUserInfo,
+    sendUserUtter,
     restart,
     exit,
     getUserState,
