@@ -35,7 +35,15 @@ var values = func_dict[type]()
       // rest
       // avg_spend
       // delete
-      delete data['名称'], data['评分'], data['电话'], data['地址'], data['地铁'],  data['酒店设施'], data['价格'], data['门票'], data['游玩时间'];
+      delete data['名称'];
+      delete data['评分']; 
+      delete data['电话'];
+      delete data['地址'];
+      delete data['地铁'];
+      delete data['酒店设施'];
+      delete data['价格'];
+      delete data['门票'];
+      delete data['游玩时间'];
 
       return data;
     })
