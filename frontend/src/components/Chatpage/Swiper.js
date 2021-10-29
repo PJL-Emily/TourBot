@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Modal } from 'antd';
 import SwiperCore, { Navigation, Pagination, Scrollbar } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import AuthService from "../../services/auth.service";
+import Service from "../../services/service";
 import InfoCard from './SlideCard';
 import 'swiper/swiper.scss';
 import "swiper/components/pagination/pagination.scss";
@@ -13,21 +13,39 @@ SwiperCore.use([ Navigation, Pagination, Scrollbar ]);
 
 const ItemSwiper = ({ type }) => {
   const func_dict = {
-    "酒店": AuthService.getHotelInfo,
-    "景點": AuthService.getSiteInfo,
-    "餐廳": AuthService.getRestInfo
+    "酒店": Service.getHotelInfo,
+    "景點": Service.getSiteInfo,
+    "餐廳": Service.getRestInfo
 };
 var values = func_dict[type]()
     .then(data => {
-        return data;
+      // rename keys to English
+      data['name'] = data['名称'];
+      data['rating'] = data['评分'];
+      data['tel'] = data['电话'];
+      data['addr'] = data['地址'];
+      data['near_sub'] = data['地铁'];
+      // hotel
+      data['facility'] = data['酒店设施'];
+      data['price'] = data['价格'];
+      // site
+      data['ticket'] = data['门票'];
+      // site, rest
+      data['time'] = data['游玩时间'];
+      // rest
+      // avg_spend
+      // delete
+      delete data['名称'], data['评分'], data['电话'], data['地址'], data['地铁'],  data['酒店设施'], data['价格'], data['门票'], data['游玩时间'];
+
+      return data;
     })
     .catch(error => {
-        const resMessage =
-          (error.response && error.response.data 
-            && error.response.data.message) || 
-            error.message || error.toString();
-        
-        console.log('getInfo error: ', resMessage);
+      const resMessage =
+        (error.response && error.response.data 
+          && error.response.data.message) || 
+          error.message || error.toString();
+      
+      console.log('getInfo error: ', resMessage);
     });
 
   values = [{
@@ -128,37 +146,3 @@ const ViewItem = ({type}) => {
 };
 
 export default ViewItem;
-
-/*
-  type = {酒店, 餐廳, 景點}
-  酒店：
-  ‘name’: (str)
-  ‘rating’: (int)
-  ‘tel’, (str)
-  ‘addr’: (str)
-  ‘facility’: [(str), ...]
-  ‘near_sub’: [(str), ...]
-  ‘price’: (str)
-  ‘img’: (str)
-  ‘search_results’: [ {‘text’: url(str)}, ...]
-  景點：
-  ‘name’: (str)
-  ‘rating’: (int)
-  ‘tel’, (str)
-  ‘addr’: (str)
-  ‘near_sub’: [(str), ...]
-  ‘time’: (str)
-  ‘ticket’: (bool)
-  ‘img’: (str)
-  ‘search_results’: [{‘text’: url(str)}, ...]
-  餐廳：
-  ‘name’: (str)
-  ‘rating’: (int)
-  ‘tel’: (str)
-  ‘addr’: (str)
-  ‘near_sub’: [(str), ...]
-  ‘time’: (str)
-  ‘avg_spend’: (int) } }
-  ‘img’: (str)
-  ‘search_results’: [{‘text’: url(str)}, ...]
-*/

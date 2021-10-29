@@ -1,147 +1,206 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask.json import JSONEncoder
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+from flask_cors import CORS
 from bson import json_util
 from config import Config
+import pymongo
 import os
 from dotenv import load_dotenv
-from pymongo.errors import BulkWriteError
-
+from serpapi import GoogleSearch
+from convlab2.dialog_agent.pipeline import Pipeline
 
 class MongoJSONEncoder(JSONEncoder):
     def default(self, obj): 
         return json_util.default(obj)
 
 app = Flask(__name__)
-app.config.from_object(Config)
-app.config["JWT_SECRET_KEY"] = "super-secret"
-# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
-# app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+cors = CORS(app)
 app.json_encoder = MongoJSONEncoder
-Config.init_app(app)
-mongo = PyMongo(app)
-db = mongo.TourBot
-app.run()
-jwt = JWTManager(app)
+load_dotenv()
+MONGO_URI = os.getenv('MONGO_URI')
+client = pymongo.MongoClient(MONGO_URI)
+db = client.TourBot
 
-def tokenValid(token):
-    # check validation by JWT
-    return True
+# initial pipeline model
+pipeline = Pipeline()
 
-#post /senUserUtter/<token> data: {token :}/<msg> data: {msg :}
-@app.route('/store/<string:token>/<string: msg>' , methods=['POST'])
-def sendMsg2Pipeline(token, msg):
-    return 
+def googleSearchLink(query):
+    try:
+        params = {
+            "q": query,
+            "api_key": os.getenv('API_KEY'),
+            "location": "Beijing,China",
+            "num": 4
+        }
+        search = GoogleSearch(params)
+        results = search.get_dict()
+        links = []
+        for result in results["organic_results"]:
+            item = {
+              "text": result['title'],
+              "url": result['link']
+            }
+            links.append(item)
+            if(len(links) == 3) :
+                break
+        return links
+    except:
+        print("No page found.")
 
-#post /restartSession/<token> data: {token :}
-@app.route('/restartSession/<string:token>' , methods=['POST'])
-def restartSession(token):
-    # validate token
-    isValid = tokenValid(token)
-    if (not isValid):
-        return "token expired."
-    # update user state
-    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-    if (result == 1):
-        return "ok"
-    else:
-        return "update failed."
+def googleSearchImg(query):
+    try:
+        params = {
+            "q": query,
+            "api_key": os.getenv('API_KEY'),
+            "tbm": "isch",
+            "num": 1
+        }
+        search = GoogleSearch(params)
+        results = search.get_dict()
+        return results['images_results'][0]["original"]
+    except:
+        print("No image found.")
 
-#post /exit/<token> data: {token :}
-@app.route('/exit/<string:token>' , methods=['POST'])
-def exit(token):
-    # validate token
-    isValid = tokenValid(token)
-    if (not isValid):
-        return "token expired."
-    # update user state
-    result = db.users.update_one({ "token": token }, { "$set": { "state": {} } })
-    if (result == 1):
-        return "ok"
-    else:
-        return "failed to exit."
-
-@jwt.expired_token_loader
-def expiredTokenCallback(jwt_header, jwt_payload):
-    return jsonify(message="token expired."), 401
-
-@app.route('/protected', methods=['GET', 'POST'])
-@jwt_required()
-def protected(): 
-    identity = get_jwt_identity()
-    return jsonify(msg='ok'), 200
 
 @app.route('/submitUserInfo', methods=['POST'])
 def submitUserInfo():
     try:
-        userInfo = request.get_json()
+        userInfo = request.get_json(force=True)
         user_dict = {
-            'purpose':userInfo['purpose']
-            # 'gender':userInfo['gender'],
-            # 'age':userInfo['age']
+            'purpose':userInfo['purpose'],
+            'gender':userInfo['gender'],
+            'age':userInfo['age']
         }
-        new_user = db.users.insert_one(user_dict).inserted_id
-
-        # create jwt token
-        accesstoken = create_access_token(identity=new_user)
-        return jsonify({'message':'ok', 'data':{'accesstoken': accesstoken}}), 200
-        # return jsonify({'message':'ok', "user": new_user}), 200
-    except BulkWriteError as e:
+        new_user = db.users.insert(user_dict)
+        return jsonify({'message':'ok', 'data':{'user_id': str(new_user)}}), 200
+    except:
         return jsonify({'message':'Failed to submit user info.'}), 400
 
 @app.route('/getUserState', methods=['GET'])
-@jwt_required()
 def getUserState():
     try:
-        token = request.get_json()['token']
-        user = db.users.find({"token": token})
-        state = db.states.find({"user_id": user._id.str})
-        return jsonify({'message':'ok', 'data':state}), 200
-    except BulkWriteError as e:
+        user_id = request.get_json(force=True) ["user_id"]
+        state = db.states.find({"user_id": user_id})
+        if state is None :
+            return jsonify({'message':'State not exists.'}), 400
+        return jsonify({'message':'ok', 'data': state}), 200
+    except:
         return jsonify({'message':'Failed to get user state.'}), 400
 
 @app.route('/getHotelInfo', methods=['GET'])
-@jwt_required()
 def getHotelInfo():
     try:
-        # token = request.get_json()['token']
-        # user = db.users.findOne({"token": token})
-        # state = db.states.findOne({"user_id": user._id.str})
-        # hotel = db.hotels.findOne({"name": state.hotel})
+        # query by state
+        # state = db.states.findOne({"user_id": user_id})
+        # name = state.hotel
 
-        #test
-        hotel = request.get_json(force=True)['hotel']
-        hotel = db.hotel.find_one({"name": hotel}, {'_id': False})
-        return jsonify({'message':'ok', "hotel": hotel}), 200
-    except BulkWriteError as e:
+        # query by hotel name
+        name = request.get_json(force=True)['hotel']
+        hotel = db.hotels.find_one({"名称": name}, 
+        {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '酒店设施': 1, '地铁': 1, '价格': 1})
+        if hotel is None :
+            return jsonify({'message':'Hotel name not exists.'}), 400
+
+        # google search result
+        links = googleSearchLink(name)
+        img = googleSearchImg(name)
+        hotel.update({"img": img, "search_results":links})
+
+        return jsonify({'message':'ok', "data": hotel}), 200
+    except:
         return jsonify({'message':'Failed to get hotel info.'}), 400
 
 @app.route('/getSiteInfo', methods=['GET'])
-@jwt_required()
 def getSiteInfo():
     try:
-        user = db.users.findOne({"token": token})
-        state = db.states.findOne({"user_id": user._id.str})
-        site = db.sites.findOne({"name": state.site})
+        # query by state
+        # state = db.states.findOne({"user_id": user_id})
+        # name = state.site
+
+        # query by site name
+        name = request.get_json(force=True)['site']
+        site = db.attractions.find_one({"名称": name}, 
+        {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '游玩时间': 1, '门票': 1})
+        if site is None :
+            return jsonify({'message':'Site name not exists.'}), 400
+
+        # google search result
+        links = googleSearchLink(name)
+        img = googleSearchImg(name)
+        site.update({"img": img, "search_results":links})
+
         return jsonify({'message':'ok',  'data':site}), 200
-    except BulkWriteError as e:
+    except:
         return jsonify({'message':'Failed to get site info.'}), 400
 
 @app.route('/getRestInfo', methods=['GET'])
-@jwt_required()
 def getRestInfo():
     try:
-        user = db.users.findOne({"token": token})
-        state = db.states.findOne({"user_id": user._id.str})
-        rest = db.rests.findOne({"name": state.rest}), 200
-        return jsonify({'message':'ok',  'data':rest})
-    except BulkWriteError as e:
+        # query by state
+        # state = db.states.findOne({"user_id": user_id})
+        # name = state.rest
+
+        # query by rest name
+        name = request.get_json(force=True)['rest']
+        rest = db.restaurants.find_one({"名称": name}, 
+        {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '营业时间': 1, '人均消费': 1})
+        if rest is None :
+            return jsonify({'message':'Restaurant name not exists.'}), 400
+
+        # google search result
+        links = googleSearchLink(name)
+        img = googleSearchImg(name)
+        rest.update({"img": img, "search_results":links})
+
+        return jsonify({'message':'ok',  'data':rest}), 200
+    except:
         return jsonify({'message':'Failed to get rest info.'}), 400
 
-@app.route("/")
-def hello():
-    return "Hello World!"
+@app.route('/sendUserUtter' , methods=['POST'])
+def sendMsg2Pipeline():
+    user_id = request.get_json(force=True)['user_id']
+    result = db.users.find_one({ "_id": user_id })
+    if (not result):
+        return jsonify({'message':'User not found.'}), 400
+        
+    # pipeline
+    current_state = None # todo: get previous state from db
+    sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(utterance, current_state = current_state)
+    # store state in db
+
+    data = {}
+    data['utter'] = sys_utter
+    if taxi['出发地'] != "":
+        data['taxi'] = False
+    else:
+        data['taxi'] = True
+    if restaurant == "":
+        data['rest'] = False
+    else:
+        data['rest'] = True
+    for domain in ['hotel', 'site']:
+        if exec(domain) == "":
+            data[domain] = False
+        else:
+            data[domain] = True
+    
+    # todo: save state and data to db
+    return jsonify({'message':'ok', 'data': data}), 200
+
+@app.route('/restartSession' , methods=['POST'])
+def restartSession():
+    user_id = request.get_json(force=True)['user_id']
+    result = db.users.find_one({ "_id": user_id })
+    if (not result):
+        return jsonify({'message':'User not found.'}), 400
+    
+    # clear user state
+    result = db.users.update_one({ "_id": user_id }, { "$set": { "state": {} } })
+    if (result == 1):
+        return jsonify({'message':'ok'}), 200
+    else:
+        return jsonify({'message':'update failed.'}), 400
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.run()
