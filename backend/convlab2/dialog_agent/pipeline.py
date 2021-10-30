@@ -54,17 +54,19 @@ class Pipeline():
         recommend = []
         select = []
         if current_state:
-            taxi = next_state['belief_state']['出租'] if next_state['belief_state']['出租'] != current_state['belief_state']['出租'] else {'出发地': '', '目的地': ''}
-            if taxi != {'出发地': '', '目的地': ''}:
+            taxi = True if next_state['belief_state']['出租'] != current_state['belief_state']['出租'] else False
+            if taxi:
                 reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{taxi['出发地']}，目的地為{taxi['目的地']}。"
-            hotel = next_state['belief_state']['酒店']['名称'] if next_state['belief_state']['酒店']['名称']  != current_state['belief_state']['酒店']['名称'] else ""
-            site = next_state['belief_state']['景点']['名称'] if next_state['belief_state']['景点']['名称']  != current_state['belief_state']['景点']['名称'] else ""
-            restaurant = next_state['belief_state']['餐馆']['名称'] if next_state['belief_state']['餐馆']['名称']  != current_state['belief_state']['餐馆']['名称'] else ""
+            hotel = True if next_state['belief_state']['酒店']['名称']  != current_state['belief_state']['酒店']['名称'] else False
+            site = True if next_state['belief_state']['景点']['名称']  != current_state['belief_state']['景点']['名称'] else False
+            restaurant = True if next_state['belief_state']['餐馆']['名称']  != current_state['belief_state']['餐馆']['名称'] else False
         else:
-            taxi =  {'出发地': '', '目的地': ''}
-            hotel = ""
-            site = ""
-            restaurant = ""
+            taxi = True if next_state['belief_state']['出租'] != '' else False
+            if taxi:
+                reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{taxi['出发地']}，目的地為{taxi['目的地']}。"
+            hotel = True if next_state['belief_state']['酒店']['名称']  != "" else False
+            site = True if next_state['belief_state']['景点']['名称']  != "" else False
+            restaurant = True if next_state['belief_state']['餐馆']['名称']  != "" else False
         # usr_action
         for da in input_action:
             if da[0] == "Inform":
