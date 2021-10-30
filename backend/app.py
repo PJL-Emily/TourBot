@@ -23,7 +23,7 @@ client = pymongo.MongoClient(MONGO_URI)
 db = client.TourBot
 
 # initial pipeline model
-pipeline = Pipeline()
+# pipeline = Pipeline()
 
 def googleSearchLink(query):
     try:
@@ -160,30 +160,42 @@ def getRestInfo():
 @app.route('/sendUserUtter' , methods=['POST'])
 def sendMsg2Pipeline():
     user_id = request.get_json(force=True)['user_id']
+    utterance = request.get_json(force=True)['msg']
     result = db.users.find_one({ "_id": user_id })
     if (not result):
         return jsonify({'message':'User not found.'}), 400
-        
+
+    # get user current state from db
+    current_state = db.states.find_one({ "user_id": user_id })
+    if current_state:
+        current_id = current_state.pop('_id', None)
+        current_state.pop('user_id', None)
+
     # pipeline
-    current_state = None # todo: get previous state from db
     sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(utterance, current_state = current_state)
+
     # store state in db
+    next_state['user_id'] = user_id
+    if current_state == None:
+        state_id = db.states.insert_one(next_state)
+    else:
+        myquery = { "_id": current_id }
+        newvalues = { "$set": next_state }
+        db.states.update_one(myquery, newvalues)
+
+    # store recommend, select in db
+    for item in recommend:
+        item['user_id'] = user_id
+        db.recommend.insert_one(item) 
+    for item in select:
+        item['user_id'] = user_id
+        db.select.insert_one(item) 
+    
 
     data = {}
+    for domain in ['taxi', 'rest', 'hotel', 'site']:
+        exec(f"data[domain] = ({domain})")
     data['utter'] = sys_utter
-    if taxi['出发地'] != "":
-        data['taxi'] = False
-    else:
-        data['taxi'] = True
-    if restaurant == "":
-        data['rest'] = False
-    else:
-        data['rest'] = True
-    for domain in ['hotel', 'site']:
-        if exec(domain) == "":
-            data[domain] = False
-        else:
-            data[domain] = True
     
     # todo: save state and data to db
     return jsonify({'message':'ok', 'data': data}), 200
@@ -201,6 +213,50 @@ def restartSession():
         return jsonify({'message':'ok'}), 200
     else:
         return jsonify({'message':'update failed.'}), 400
+
+# state = {'belief_state': {'出租': {'出发地': '', '目的地': ''},
+#                 '地铁': {'出发地': '', '目的地': ''},
+#                 '景点': {'名称': '',
+#                         '周边景点': '',
+#                         '周边酒店': '',
+#                         '周边餐馆': '',
+#                         '游玩时间': '',
+#                         '评分': '',
+#                         '门票': ''},
+#                 '酒店': {'价格': '',
+#                         '名称': '',
+#                         '周边景点': '',
+#                         '周边酒店': '',
+#                         '周边餐馆': '',
+#                         '评分': '',
+#                         '酒店类型': '',
+#                         '酒店设施': ''},
+#                 '餐馆': {'人均消费': '50-100元',
+#                         '名称': '',
+#                         '周边景点': '',
+#                         '周边酒店': '',
+#                         '周边餐馆': '',
+#                         '推荐菜': '美食街',
+#                         '评分': ''}},
+# 'cur_domain': '餐馆',
+# 'history': [],
+# 'request_slots': [['餐馆', '名称']],
+# 'system_action': [],
+# 'terminated': False,
+# 'user_action': [['General', 'greet', 'none', 'none'],
+#                 ['General', 'thank', 'none', 'none'],
+#                 ['Request', '餐馆', '名称', ''],
+#                 ['Inform', '餐馆', '推荐菜', '美食街'],
+#                 ['Inform', '餐馆', '人均消费', '50-100元']]}
+
+# state_id = db.states.insert_one(state)
+# print(state_id)
+
+# a = db.states.find_one({ "cur_domain": "餐馆" })
+# print(a)
+
+
+    
 
 if __name__ == '__main__':
     app.run()
