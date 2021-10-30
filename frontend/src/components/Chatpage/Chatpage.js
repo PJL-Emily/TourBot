@@ -3,7 +3,6 @@ import 'antd/dist/antd.css';
 import '../../scss/main.scss';
 import React, { useState } from 'react';
 import MessageList from './MessageList';
-import UserInput from './UserInput';
 import { useIdleTimer } from 'react-idle-timer';
 import { Link, useHistory } from 'react-router-dom';
 import ViewState from './ViewState';
@@ -16,7 +15,7 @@ function Chatpage () {
   function navigateToHome () {
     history.push("/");
   };
-  function refreshPage () {
+  function restartPage () {
     let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
     if (window.confirm(msg)) {
       Service.restart()
@@ -25,7 +24,8 @@ function Chatpage () {
       })
       .catch((err) => {
           console.log(err);
-      });
+      }); 
+      window.location.reload(false);
     }
   }
   function exitPage (event) {
@@ -70,20 +70,33 @@ function Chatpage () {
   });
 
   const handleMessageChange = (event) => {
-    console.log("event123: ",event)
+    console.log("Message Change Event: ",event);
     setNewMessage(event.target.value);
-    console.log("Set State after message change =>", newMessage)
+    console.log("Set State after message change =>", newMessage);
   }
   const handleKeyDown = (event) => {
     const message = event.target.value;
-    console.log("message: ",message)
-    console.log("event: ",event)
+    console.log("Key Down Message: ",message);
+    console.log("Key Down Event: ",event);
     const time = new Date().toDateString();
-    console.log("time: ",time)
+    console.log("Key Down Time: ",time);
     const addMessage = {fromMe: true, text: message, time: time};
-    console.log("addMessage: ",addMessage)
+    console.log("Key Down AddMessage: ",addMessage);
 
     if (event.keyCode === 13 && message !== '') {
+
+      setThreads((threads) =>
+      [...threads, addMessage]
+      );
+      setNewMessage('');
+    }
+  }
+  const handleSendMessage = (event) => {
+    const time = new Date().toDateString();
+    const addMessage = {fromMe: true, text: newMessage, time: time};
+    console.log("Send Button AddMessage: ",addMessage);
+
+    if (newMessage !== '') {
 
       setThreads((threads) =>
       [...threads, addMessage]
@@ -113,16 +126,9 @@ function Chatpage () {
                   <MessageList threads={threads}/>
                 </div>
               </div>
-              {/* <div className="Chat inputForm">
-                <UserInput
-                  newMessage={newMessage}
-                  messageChange={handleMessageChange}
-                  handleKeyDown={handleKeyDown}
-                />
-              </div> */}
               <div className="Chat inputForm">
                 <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
-                <button className="Chat sendbtn" type="submit" id="usrsend" name="usrsend">傳送</button>
+                <button className="Chat sendbtn" id="usrsend" name="usrsend" onChange={handleMessageChange} onClick={handleSendMessage}>傳送</button>
               </div>
             </div>
             <div className="Chat inform">
@@ -137,7 +143,7 @@ function Chatpage () {
               </div>
               <div className="Chat infoExit">
                 <div className="Chat restart">
-                  <a onClick={refreshPage}>
+                  <a onClick={restartPage}>
                     <span className="material-icons Chat btn">
                       restart_alt
                     </span>             

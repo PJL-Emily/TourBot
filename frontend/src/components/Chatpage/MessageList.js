@@ -5,16 +5,15 @@ import PropTypes from 'prop-types';
 
 export default class MessageList extends Component {
   static propTypes = {
-    threads: PropTypes.array.isRequired,
-    index: PropTypes.number.isRequired
+    threads: PropTypes.array.isRequired
   }
 
   render() {
     const { threads} = this.props;
     // const threads = this.props.threads
     // const index = this.props.index
-    console.log("threads: ", threads);
-    console.log("threads[0]: ", threads[0]);
+    console.log("Threads in Message List: ", threads);
+    // console.log("threads[0]: ", threads[0]);
     // const messages = threads.messages;
     return (
       <div>
