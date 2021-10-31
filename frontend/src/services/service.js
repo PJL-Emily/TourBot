@@ -78,6 +78,7 @@ const getRestInfo = async () => {
     return response.data;
 };
 
+
 const Service = {
     submitUserInfo,
     sendUserUtter,
