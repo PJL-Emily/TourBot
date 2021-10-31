@@ -18,6 +18,7 @@ python-dotenv = "*"
 pymongo = {extras = ["srv"], version = "*"}
 google-search-results = "*"
 flask-cors = "*"
+opencc = "*"
 
 [dev-packages]
 
