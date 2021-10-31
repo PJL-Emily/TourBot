@@ -37,17 +37,6 @@ const restart = async () => {
     return response.data;
 };
 
-const exit = async () => {
-    var data = { user_id: TokenService.getUser().user_id };
-    // var data = { user_id: "test_id" };
-
-    const response = await api
-        .post("exit", data);
-    TokenService.removeUser();
-
-    return response.data;
-};
-
 const getUserState = async () => {
     var data = { user_id: TokenService.getUser().user_id };
     console.log("data: ", data);
@@ -93,7 +82,6 @@ const Service = {
     submitUserInfo,
     sendUserUtter,
     restart,
-    exit,
     getUserState,
     getHotelInfo,
     getSiteInfo,

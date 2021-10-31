@@ -30,13 +30,7 @@ function Chatpage () {
   }
   function exitPage (event) {
     let msg = "您確定要離開聊天室嗎？\n所有聊天記錄將被清空，您將需要重新填寫個人資訊";
-    if (window.confirm(msg)) {
-      Service.exit()
-      .catch((err) => {
-        console.log(err);
-      });
-    }
-    else {
+    if (!window.confirm(msg)) {
       event.preventDefault();
     }
   }
@@ -47,10 +41,6 @@ function Chatpage () {
     // TODO: how to force close modal?
     // in restart/exit confirm window, idle timer does not work
     console.log('last active', getLastActiveTime());
-    Service.exit()
-    .catch((err) => {
-      console.log(err);
-    });
     navigateToHome();
   }
   const handleOnActive = () => {

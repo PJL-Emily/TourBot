@@ -3,6 +3,7 @@ import '../../scss/main.scss';
 import { useState } from 'react';
 import { Modal } from 'antd';
 import Service from "../../services/service";
+import GoogleApiWrapper from "./Map";
 
 function StateModal () {
     Service.getUserState()
@@ -23,33 +24,39 @@ function StateModal () {
     };
 
     return (
-        <ul className="state-list">
-            <li>
-                <span className="material-icons Chat btn">bed</span>
-                {state.hotel}
+        <div class="state-ctnr">
+            {/* <GoogleApiWrapper>
                 
-            </li>
-            <li>
-                <span className="material-icons Chat btn">museum</span>
-                {state.site}
-            </li>
-            <li>
-                <span className="material-icons Chat btn">restaurant_menu</span>
-                {state.rest}
-            </li>
-            <li>
-                <span className="material-icons Chat btn">subway</span>
-                {state.sub[0]}
-                <span className="material-icons Chat btn">arrow_forward</span>
-                {state.sub[1]}
-            </li>
-            <li>
-                <span className="material-icons Chat btn">local_taxi</span>
-                {state.taxi[0]}
-                <span className="material-icons Chat btn">arrow_forward</span>
-                {state.taxi[1]}
-            </li>
-        </ul>
+            </GoogleApiWrapper> */}
+            <ul className="state-list">
+                <li>
+                    <span className="material-icons Chat btn">bed</span>
+                    {state.hotel}
+                    
+                </li>
+                <li>
+                    <span className="material-icons Chat btn">museum</span>
+                    {state.site}
+                </li>
+                <li>
+                    <span className="material-icons Chat btn">restaurant_menu</span>
+                    {state.rest}
+                </li>
+                <li>
+                    <span className="material-icons Chat btn">subway</span>
+                    {state.sub[0]}
+                    <span className="material-icons Chat btn">arrow_forward</span>
+                    {state.sub[1]}
+                </li>
+                <li>
+                    <span className="material-icons Chat btn">local_taxi</span>
+                    {state.taxi[0]}
+                    <span className="material-icons Chat btn">arrow_forward</span>
+                    {state.taxi[1]}
+                </li>
+            </ul>
+        </div>
+        
     );
 };
 
