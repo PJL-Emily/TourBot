@@ -70,38 +70,109 @@ function Chatpage () {
   });
 
   const handleMessageChange = (event) => {
-    console.log("Message Change Event: ",event);
+    // console.log("Message Change Event: ",event);
     setNewMessage(event.target.value);
-    console.log("Set State after message change =>", newMessage);
+    // console.log("Set State after message change =>", newMessage);
   }
   const handleKeyDown = (event) => {
     const message = event.target.value;
-    console.log("Key Down Message: ",message);
-    console.log("Key Down Event: ",event);
+    // console.log("Key Down Message: ",message);
+    // console.log("Key Down Event: ",event);
     const time = new Date().toDateString();
-    console.log("Key Down Time: ",time);
+    // console.log("Key Down Time: ",time);
     const addMessage = {fromMe: true, text: message, time: time};
-    console.log("Key Down AddMessage: ",addMessage);
+    // console.log("Key Down AddMessage: ",addMessage);
 
     if (event.keyCode === 13 && message !== '') {
+      Service.sendUserUtter(newMessage)
+      .then(data => {
+        console.log('Send user utterance: ', newMessage);
+        console.log('Response data: ', data)
+        
+        setThreads((threads) =>
+        [...threads, addMessage]
+        );
+        setNewMessage('');
 
-      setThreads((threads) =>
-      [...threads, addMessage]
-      );
-      setNewMessage('');
+        // response
+        const reMessage = {fromMe: false, text: "我是機器人", time: time};
+        setThreads((threads) =>
+        [...threads, reMessage]
+        );
+      })
+      .catch(error => {
+        const resMessage =
+          (error.response && error.response.data 
+            && error.response.data.message) || 
+            error.message || error.toString();
+
+            console.log('sendUserUtter error: ', resMessage);
+            //TEST
+            alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
+            setThreads((threads) =>
+            [...threads, addMessage]
+            );
+            setNewMessage('');
+            const reMessage = {fromMe: false, text: "我是機器人", time: time};
+            setThreads((threads) =>
+            [...threads, reMessage]
+            );
+            //
+      })
+
+      // setThreads((threads) =>
+      // [...threads, addMessage]
+      // );
+      // setNewMessage('');
     }
   }
   const handleSendMessage = (event) => {
     const time = new Date().toDateString();
     const addMessage = {fromMe: true, text: newMessage, time: time};
-    console.log("Send Button AddMessage: ",addMessage);
+    // console.log("Send Button AddMessage: ",addMessage);
 
     if (newMessage !== '') {
+      // HERE
+      Service.sendUserUtter(newMessage)
+      .then(data => {
+        console.log('Send user utterance: ', newMessage);
+        console.log('Response data: ', data)
+        
+        setThreads((threads) =>
+        [...threads, addMessage]
+        );
+        setNewMessage('');
+        
+        // response
+        const reMessage = {fromMe: false, text: "我是機器人", time: time};
+        setThreads((threads) =>
+        [...threads, reMessage]
+        );
+      })
+      .catch(error => {
+        const resMessage =
+          (error.response && error.response.data 
+            && error.response.data.message) || 
+            error.message || error.toString();
 
-      setThreads((threads) =>
-      [...threads, addMessage]
-      );
-      setNewMessage('');
+            console.log('sendUserUtter error: ', resMessage);
+            //TEST
+            alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
+            setThreads((threads) =>
+            [...threads, addMessage]
+            );
+            setNewMessage('');
+            const reMessage = {fromMe: false, text: "我是機器人", time: time};
+            setThreads((threads) =>
+            [...threads, reMessage]
+            );
+            //
+      })
+
+      // setThreads((threads) =>
+      // [...threads, addMessage]
+      // );
+      // setNewMessage('');
     }
   }
 
@@ -113,7 +184,7 @@ function Chatpage () {
     ]
   )
 
-  console.log("Initial State before return =>", threads, " & New message =>", newMessage)
+  // console.log("Initial State before return =>", threads, " & New message =>", newMessage)
 
   return (
 
