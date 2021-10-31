@@ -9,6 +9,7 @@ import os
 from dotenv import load_dotenv
 from serpapi import GoogleSearch
 from convlab2.dialog_agent.pipeline import Pipeline
+from opencc import OpenCC
 
 class MongoJSONEncoder(JSONEncoder):
     def default(self, obj): 
@@ -160,9 +161,10 @@ def getRestInfo():
 @app.route('/sendUserUtter' , methods=['POST'])
 def sendMsg2Pipeline():
     user_id = request.get_json(force=True)['user_id']
-    utterance = request.get_json(force=True)['msg']
+    user_utter = request.get_json(force=True)['msg']
+    user_utter = OpenCC('t2s').convert(user_utter)
     result = db.users.find_one({ "_id": user_id })
-    if (not result):
+    if result is None:
         return jsonify({'message':'User not found.'}), 400
 
     # get user current state from db
@@ -172,7 +174,7 @@ def sendMsg2Pipeline():
         current_state.pop('user_id', None)
 
     # pipeline
-    sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(utterance, current_state = current_state)
+    sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(user_utter, current_state = current_state)
 
     # store state in db
     next_state['user_id'] = user_id
@@ -191,20 +193,23 @@ def sendMsg2Pipeline():
         item['user_id'] = user_id
         db.select.insert_one(item) 
     
-
     data = {}
     for domain in ['taxi', 'rest', 'hotel', 'site']:
         exec(f"data[domain] = ({domain})")
     data['utter'] = sys_utter
     
     # todo: save state and data to db
+
+    # after save utter to db, translate the sys utter to traditional chinese
+    data['utter'] = OpenCC('s2t').convert(sys_utter)
+    
     return jsonify({'message':'ok', 'data': data}), 200
 
 @app.route('/restartSession' , methods=['POST'])
 def restartSession():
     user_id = request.get_json(force=True)['user_id']
     result = db.users.find_one({ "_id": user_id })
-    if (not result):
+    if result is None:
         return jsonify({'message':'User not found.'}), 400
     
     # clear user state
