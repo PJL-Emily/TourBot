@@ -162,7 +162,7 @@ def sendMsg2Pipeline():
     user_id = request.get_json(force=True)['user_id']
     utterance = request.get_json(force=True)['msg']
     result = db.users.find_one({ "_id": user_id })
-    if (not result):
+    if result is None:
         return jsonify({'message':'User not found.'}), 400
 
     # get user current state from db
@@ -204,7 +204,7 @@ def sendMsg2Pipeline():
 def restartSession():
     user_id = request.get_json(force=True)['user_id']
     result = db.users.find_one({ "_id": user_id })
-    if (not result):
+    if result is None:
         return jsonify({'message':'User not found.'}), 400
     
     # clear user state
