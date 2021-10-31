@@ -38,8 +38,6 @@ function Chatpage () {
   const handleOnIdle = () => {
     console.log('user is idle');
     window.alert('您已閒置過久，將自動導入首頁重新進入聊天');
-    // TODO: how to force close modal?
-    // in restart/exit confirm window, idle timer does not work
     console.log('last active', getLastActiveTime());
     navigateToHome();
   }
