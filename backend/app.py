@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from flask.json import JSONEncoder
 from flask_cors import CORS
 from bson import json_util
+from bson.objectid import ObjectId
 from config import Config
 import pymongo
 import os
@@ -24,7 +25,7 @@ client = pymongo.MongoClient(MONGO_URI)
 db = client.TourBot
 
 # initial pipeline model
-# pipeline = Pipeline()
+pipeline = Pipeline()
 
 def googleSearchLink(query):
     try:
@@ -82,7 +83,7 @@ def submitUserInfo():
 def getUserState():
     try:
         user_id = request.get_json(force=True) ["user_id"]
-        state = db.states.find({"user_id": user_id})
+        state = db.states.find({"user_id": ObjectId(user_id)})
         if state is None :
             return jsonify({'message':'State not exists.'}), 400
         return jsonify({'message':'ok', 'data': state}), 200
@@ -93,7 +94,7 @@ def getUserState():
 def getHotelInfo():
     try:
         # query by state
-        # state = db.states.findOne({"user_id": user_id})
+        # state = db.states.findOne({"user_id": ObjectId(user_id)})
         # name = state.hotel
 
         # query by hotel name
@@ -116,7 +117,7 @@ def getHotelInfo():
 def getSiteInfo():
     try:
         # query by state
-        # state = db.states.findOne({"user_id": user_id})
+        # state = db.states.findOne({"user_id": ObjectId(user_id)})
         # name = state.site
 
         # query by site name
@@ -139,7 +140,7 @@ def getSiteInfo():
 def getRestInfo():
     try:
         # query by state
-        # state = db.states.findOne({"user_id": user_id})
+        # state = db.states.findOne({"user_id": ObjectId(user_id)})
         # name = state.rest
 
         # query by rest name
@@ -152,7 +153,7 @@ def getRestInfo():
         # google search result
         links = googleSearchLink(name)
         img = googleSearchImg(name)
-        rest.update({"img": img, "search_results":links})
+        rest.update({"img": img, "search_results": links})
 
         return jsonify({'message':'ok',  'data':rest}), 200
     except:
@@ -161,15 +162,20 @@ def getRestInfo():
 @app.route('/sendUserUtter' , methods=['POST'])
 def sendMsg2Pipeline():
     user_id = request.get_json(force=True)['user_id']
+    # print(user_id, type(user_id))
     user_utter = request.get_json(force=True)['msg']
     user_utter = OpenCC('t2s').convert(user_utter)
-    result = db.users.find_one({ "_id": user_id })
+    # result = db.users.find({ "_id": user_id })
+    # print(result)
+    result = db.users.find_one({ "_id": ObjectId(user_id) })
+    print(result)
     if result is None:
         return jsonify({'message':'User not found.'}), 400
 
     # get user current state from db
-    current_state = db.states.find_one({ "user_id": user_id })
-    if current_state:
+    current_state = db.states.find_one({ "user_id": ObjectId(user_id) })
+    # print(type(current_state))
+    if current_state is not None:
         current_id = current_state.pop('_id', None)
         current_state.pop('user_id', None)
 
@@ -177,20 +183,20 @@ def sendMsg2Pipeline():
     sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(user_utter, current_state = current_state)
 
     # store state in db
-    next_state['user_id'] = user_id
+    next_state['user_id'] = ObjectId(user_id)
     if current_state == None:
         state_id = db.states.insert_one(next_state)
     else:
-        myquery = { "_id": current_id }
+        myquery = { "_id": ObjectId(current_id) }
         newvalues = { "$set": next_state }
         db.states.update_one(myquery, newvalues)
 
     # store recommend, select in db
     for item in recommend:
-        item['user_id'] = user_id
+        item['user_id'] = ObjectId(user_id)
         db.recommend.insert_one(item) 
     for item in select:
-        item['user_id'] = user_id
+        item['user_id'] = ObjectId(user_id)
         db.select.insert_one(item) 
     
     data = {}
@@ -208,12 +214,12 @@ def sendMsg2Pipeline():
 @app.route('/restartSession' , methods=['POST'])
 def restartSession():
     user_id = request.get_json(force=True)['user_id']
-    result = db.users.find_one({ "_id": user_id })
+    result = db.users.find_one({ "_id": ObjectId(user_id) })
     if result is None:
         return jsonify({'message':'User not found.'}), 400
     
     # clear user state
-    result = db.users.update_one({ "_id": user_id }, { "$set": { "state": {} } })
+    result = db.users.update_one({ "_id": ObjectId(user_id) }, { "$set": { "state": {} } })
     if (result == 1):
         return jsonify({'message':'ok'}), 200
     else:
