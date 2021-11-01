@@ -2,12 +2,14 @@ import api from "./api";
 import TokenService from "./token.service";
 
 const submitUserInfo = async (purpose, gender, age) => {
+    var data = {
+        purpose: purpose,
+        gender: gender,
+        age: age
+    };
+    console.log("data to send: ", data);
     const response = await api
-        .post("submitUserInfo", {
-            purpose: purpose,
-            gender: gender,
-            age: age
-        });
+        .post("submitUserInfo", data);
     if (response.data.data.user_id) {
         TokenService.setUser(response.data.data);
     }
@@ -29,7 +31,7 @@ const sendUserUtter = async (utterance) => {
 const restart = async () => {
     var data = { user_id: TokenService.getUser().user_id };
     // var data = { user_id: "test_id" };
-
+    console.log("restart: data ", data);
     const response = await api
         .post("restartSession", data);
     console.log(response);

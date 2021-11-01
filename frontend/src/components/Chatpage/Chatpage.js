@@ -5,17 +5,22 @@ import React, { useState } from 'react';
 import MessageList from './MessageList';
 import { useIdleTimer } from 'react-idle-timer';
 import { Link, useHistory } from 'react-router-dom';
-import ViewState from './ViewState';
-import ViewItem from './Swiper';
+import ViewState from './State/ViewState';
+import ViewItem from './Swiper/Swiper';
 import Service from "../../services/service";
 
 
 function Chatpage () {
+  // use incremental approach
+  const [hotel, setHotel] = useState(0);
+  const [rest, setRest] = useState(0);
+  const [site, setSite] = useState(0);
+
   const history = useHistory();
-  function navigateToHome () {
+  const navigateToHome = () => {
     history.push("/");
   };
-  function restartPage () {
+  const restartPage = () => {
     let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
     if (window.confirm(msg)) {
       Service.restart()
@@ -25,10 +30,11 @@ function Chatpage () {
       .catch((err) => {
           console.log(err);
       }); 
-      window.location.reload(false);
+      // window.location.reload(false);
     }
   }
-  function exitPage (event) {
+
+  const exitPage = (event) => {
     let msg = "您確定要離開聊天室嗎？\n所有聊天記錄將被清空，您將需要重新填寫個人資訊";
     if (!window.confirm(msg)) {
       event.preventDefault();
@@ -40,14 +46,16 @@ function Chatpage () {
     window.alert('您已閒置過久，將自動導入首頁重新進入聊天');
     console.log('last active', getLastActiveTime());
     navigateToHome();
+    // reset state?
   }
+
   const handleOnActive = () => {
     console.log('user is active');
     console.log('time remaining', getRemainingTime());
   };
+
   const handleOnAction = () => {
-    console.log('user did something');
-    // TODO: refresh token
+    // console.log('user did something');
   };
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 60 * 30 * 1, // idle time: 30 min
@@ -165,14 +173,12 @@ function Chatpage () {
   }
 
   // Handle Input
-  const [newMessage, setNewMessage] = React.useState('')
-  const [threads, setThreads] = React.useState(
+  const [newMessage, setNewMessage] = useState('')
+  const [threads, setThreads] = useState(
     [
       {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
     ]
   )
-
-  // console.log("Initial State before return =>", threads, " & New message =>", newMessage)
 
   return (
 
@@ -196,11 +202,37 @@ function Chatpage () {
               <h3>很高興為您服務！</h3>
               <div className="Chat infoFunction">
                 <ViewState />
-                <ViewItem type="酒店" />
-                <ViewItem type="景點" />
-                <ViewItem type="餐廳" />
+                <ViewItem 
+                  type="酒店" 
+                  effect={hotel}
+                />
+                <ViewItem 
+                  type="景點" 
+                  effect={site}
+                />
+                <ViewItem 
+                  type="餐廳"
+                  effect={rest}
+                />
               </div>
               <div className="Chat infoExit">
+
+
+
+                <div className="Chat restart">
+                  <a onClick={() => {
+                    setHotel((hotel) => hotel + 1);
+                    console.log(hotel);
+                  }}>
+                    <span className="material-icons Chat btn">
+                      restart_alt
+                    </span>          
+                    <p>test setHotel</p>
+                  </a>
+                </div>
+
+
+                
                 <div className="Chat restart">
                   <a onClick={restartPage}>
                     <span className="material-icons Chat btn">

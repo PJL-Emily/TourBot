@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from 'antd';
 import SwiperCore, { Navigation, Pagination, Scrollbar } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import Service from "../../services/service";
+import Service from "../../../services/service";
+import { useIsFirstRender } from '../../useIsFirstRender';
 import InfoCard from './SlideCard';
 import 'swiper/swiper.scss';
 import "swiper/components/pagination/pagination.scss";
 import "swiper/components/navigation/navigation.scss";
-import '../../scss/main.scss';
+import '../../../scss/main.scss';
 
 SwiperCore.use([ Navigation, Pagination, Scrollbar ]);
 
@@ -116,18 +117,34 @@ var values = func_dict[type]()
   );
 };
 
-const ViewItem = ({type}) => {
+const ViewItem = ({type, effect}) => {
   const [visible, setVisible] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const isFirstRender = useIsFirstRender();
   const icon_dict = {
     '酒店': ['bed-btn', 'bed'],
     '餐廳': ['restaurant-btn', 'restaurant_menu'],
     '景點': ['museum-btn', 'museum']
   }
 
+  // console.log("in swiper type", type, " effect = ", effect);
+  var btnClass = "info-btn " + icon_dict[type][0];
+  useEffect(() => {
+    if (!isFirstRender) {
+      // console.log('Subsequent Render');
+      setIsFlashing(true);
+      setTimeout(() => setIsFlashing(false), 3000);
+    }
+    // else {
+    //   console.log('First Render');
+    // }
+  }, [effect]);
+
   return (
     <div>
       <button
-        className={"info-btn " + icon_dict[type][0]}
+        className={btnClass}
+        is-flashing={isFlashing ? "true" : "false"}
         onClick={() => {
           setVisible(true);
         }}
