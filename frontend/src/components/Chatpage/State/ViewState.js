@@ -1,9 +1,9 @@
 import 'antd/dist/antd.css';
-import '../../scss/main.scss';
+import '../../../scss/main.scss';
 import { useState } from 'react';
 import { Modal } from 'antd';
-import Service from "../../services/service";
-// import GoogleApiWrapper from "./Map";
+import Service from "../../../services/service";
+import GoogleApiWrapper from "./Map";
 
 function StateModal () {
     Service.getUserState()
