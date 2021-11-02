@@ -152,7 +152,18 @@
         margin: 5%;
     }
 
-
+    @keyframes flashing {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }  
+    }
+    
     .infoFunction {
         @include mt-1;
         width: 50%;
@@ -173,7 +184,7 @@
             justify-content: center;
             outline: none;
             border: none;
-            @include transition-2;
+            @include transition-1;
 
             &:hover {
                 cursor: pointer;
@@ -184,6 +195,9 @@
                 width: 50%;
                 color: white;
             }
+        }
+        .info-btn[is-flashing="true"] {
+            animation: flashing 1500ms linear infinite;
         }
         .preview-btn{
             background-color: $orange;

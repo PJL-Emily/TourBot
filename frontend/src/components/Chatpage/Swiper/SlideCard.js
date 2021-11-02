@@ -1,4 +1,4 @@
-import '../../scss/main.scss';
+import '../../../scss/main.scss';
 
 const HotelInfo = (data) => {
     var facilities = data.facility.toString().replace(",", "、");
