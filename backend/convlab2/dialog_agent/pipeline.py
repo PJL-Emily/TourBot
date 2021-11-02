@@ -35,9 +35,6 @@ class Pipeline():
         """
         # get context
         context = [x[1] for x in current_state['history'][:-1]] if current_state else []
-        print("%%%")
-        print(context)
-        print("%%%")
         # get reply utterance
         input_action = self.nlu.predict(utterance, context)
         self.dst.init_session(current_state)
@@ -56,14 +53,20 @@ class Pipeline():
         if current_state:
             taxi = True if next_state['belief_state']['出租'] != current_state['belief_state']['出租'] else False
             if taxi:
-                reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{taxi['出发地']}，目的地為{taxi['目的地']}。"
+                reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{next_state['belief_state']['出租']['出发地']}，目的地為{next_state['belief_state']['出租']['目的地']}。"
             hotel = True if next_state['belief_state']['酒店']['名称']  != current_state['belief_state']['酒店']['名称'] else False
             site = True if next_state['belief_state']['景点']['名称']  != current_state['belief_state']['景点']['名称'] else False
             restaurant = True if next_state['belief_state']['餐馆']['名称']  != current_state['belief_state']['餐馆']['名称'] else False
         else:
-            taxi = True if next_state['belief_state']['出租'] != '' else False
+            taxi = True if next_state['belief_state']['出租'] != {'出发地':"", '目的地':""} else False
             if taxi:
-                reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{taxi['出发地']}，目的地為{taxi['目的地']}。"
+                if next_state['belief_state']['出租']['出发地'] != "" and next_state['belief_state']['出租']['目的地'] != "":
+                    reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{next_state['belief_state']['出租']['出发地']}，目的地為{next_state['belief_state']['出租']['目的地']}。"
+                elif next_state['belief_state']['出租']['出发地'] == "":
+                    reply_utterance = f"好的，即將為您導向一個出租車網站，目的地為{next_state['belief_state']['出租']['目的地']}。"
+                elif next_state['belief_state']['出租']['目的地'] == "":
+                    reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{next_state['belief_state']['出租']['出发地']}。"
+      
             hotel = True if next_state['belief_state']['酒店']['名称']  != "" else False
             site = True if next_state['belief_state']['景点']['名称']  != "" else False
             restaurant = True if next_state['belief_state']['餐馆']['名称']  != "" else False
@@ -71,12 +74,18 @@ class Pipeline():
         for da in input_action:
             if da[0] == "Inform":
                 if da[2] == '名称':
-                    select.append(f'{da[1]}-{da[3]}')
+                    insert_item = {}
+                    insert_item['domain'] = da[1]
+                    insert_item['name'] = da[3]
+                    select.append(insert_item)
         # sys_action
         for da in output_action:
             if da[0] == "Recommend":
                 if da[2] == '名称':
-                    recommend.append(f'{da[1]}-{da[3]}')
+                    insert_item = {}
+                    insert_item['domain'] = da[1]
+                    insert_item['name'] = da[3]
+                    recommend.append(insert_item)
 
         return reply_utterance, next_state, recommend, select, taxi, hotel, site, restaurant
 
