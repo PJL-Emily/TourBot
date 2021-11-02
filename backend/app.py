@@ -159,11 +159,21 @@ def getRestInfo():
     except:
         return jsonify({'message':'Failed to get rest info.'}), 400
 
+commonWord = {}
+commonWord['飯店'] = "酒店"
+
 @app.route('/sendUserUtter' , methods=['POST'])
 def sendMsg2Pipeline():
     user_id = request.get_json(force=True)['user_id']
     user_utter = request.get_json(force=True)['msg']
-    user_utter = OpenCC('t2s').convert(user_utter)
+
+    # key phrase transfer
+    for key in commonWord:
+        if key in user_utter:
+            user_utter = user_utter.replace(key, commonWord[key])
+
+    user_utter = OpenCC('tw2sp').convert(user_utter)
+    print("簡問:", user_utter)
     result = db.users.find_one({ "_id": ObjectId(user_id) })
     if result is None:
         return jsonify({'message':'User not found.'}), 400
@@ -199,7 +209,8 @@ def sendMsg2Pipeline():
         exec(f"data[domain] = ({domain})")
     data['utter'] = sys_utter
     # after save utter to db, translate the sys utter to traditional chinese
-    data['utter'] = OpenCC('s2t').convert(sys_utter)
+    print("簡答:", sys_utter)
+    data['utter'] = OpenCC('s2twp').convert(sys_utter)
     
     return jsonify({'message':'ok', 'data': data}), 200
 

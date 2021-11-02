@@ -53,7 +53,7 @@ class Pipeline():
         if current_state:
             taxi = True if next_state['belief_state']['出租'] != current_state['belief_state']['出租'] else False
             if taxi:
-                reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{next_state['belief_state']['出租']['出发地']}，目的地為{next_state['belief_state']['出租']['目的地']}。"
+                reply_utterance = f"好的，即將為您導向一個計程車網站，出發地為{next_state['belief_state']['出租']['出发地']}，目的地為{next_state['belief_state']['出租']['目的地']}。"
             hotel = True if next_state['belief_state']['酒店']['名称']  != current_state['belief_state']['酒店']['名称'] else False
             site = True if next_state['belief_state']['景点']['名称']  != current_state['belief_state']['景点']['名称'] else False
             restaurant = True if next_state['belief_state']['餐馆']['名称']  != current_state['belief_state']['餐馆']['名称'] else False
@@ -61,11 +61,11 @@ class Pipeline():
             taxi = True if next_state['belief_state']['出租'] != {'出发地':"", '目的地':""} else False
             if taxi:
                 if next_state['belief_state']['出租']['出发地'] != "" and next_state['belief_state']['出租']['目的地'] != "":
-                    reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{next_state['belief_state']['出租']['出发地']}，目的地為{next_state['belief_state']['出租']['目的地']}。"
+                    reply_utterance = f"好的，即將為您導向一個計程車網站，出發地為{next_state['belief_state']['出租']['出发地']}，目的地為{next_state['belief_state']['出租']['目的地']}。"
                 elif next_state['belief_state']['出租']['出发地'] == "":
-                    reply_utterance = f"好的，即將為您導向一個出租車網站，目的地為{next_state['belief_state']['出租']['目的地']}。"
+                    reply_utterance = f"好的，即將為您導向一個計程車網站，目的地為{next_state['belief_state']['出租']['目的地']}。"
                 elif next_state['belief_state']['出租']['目的地'] == "":
-                    reply_utterance = f"好的，即將為您導向一個出租車網站，出發地為{next_state['belief_state']['出租']['出发地']}。"
+                    reply_utterance = f"好的，即將為您導向一個計程車網站，出發地為{next_state['belief_state']['出租']['出发地']}。"
       
             hotel = True if next_state['belief_state']['酒店']['名称']  != "" else False
             site = True if next_state['belief_state']['景点']['名称']  != "" else False
