@@ -35,13 +35,12 @@ function StateModal () {
                         name: "北京鹏润国际大酒店",
                         addr: "北京朝阳区霄云路26号"
                     },
-                    {
-                        name: "瑞尔威连锁饭店(北京西客站店)",
-                        addr: "北京丰台区莲花池东路116-2号"
-                    }
+                    // {
+                    //     name: "瑞尔威连锁饭店(北京西客站店)",
+                    //     addr: "北京丰台区莲花池东路116-2号"
+                    // }
                 ]}
             >
-                
             </GoogleApiWrapper>
             <ul className="state-list">
                 <li>

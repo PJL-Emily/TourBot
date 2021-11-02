@@ -34,7 +34,6 @@ const restart = async () => {
     console.log("restart: data ", data);
     const response = await api
         .post("restartSession", data);
-    console.log(response);
 
     return response.data;
 };
