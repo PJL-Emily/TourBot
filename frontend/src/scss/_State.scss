@@ -2,12 +2,19 @@
 
 .state-ctnr {
     display: flex;
-    
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
 }
 
-#map {
-    height: 400px;
-    /* The height is 400 pixels */
-    width: 50%;
-    /* The width is the width of the web page */
-  }
+.state-list {
+    width: 40%;
+
+    li {
+        font-size: large;
+        line-height: 4;
+    }
+}
+// .info-modal {
+//     padding: 0 10px;
+// }

@@ -39,6 +39,9 @@ function Chatpage () {
     if (!window.confirm(msg)) {
       event.preventDefault();
     }
+    else {
+      console.clear();
+    }
   }
 
   const handleOnIdle = () => {
