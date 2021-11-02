@@ -159,28 +159,33 @@ def getRestInfo():
     except:
         return jsonify({'message':'Failed to get rest info.'}), 400
 
+commonWord = {}
+commonWord['飯店'] = "酒店"
+
 @app.route('/sendUserUtter' , methods=['POST'])
 def sendMsg2Pipeline():
     user_id = request.get_json(force=True)['user_id']
-    # print(user_id, type(user_id))
     user_utter = request.get_json(force=True)['msg']
-    user_utter = OpenCC('t2s').convert(user_utter)
-    # result = db.users.find({ "_id": user_id })
-    # print(result)
+
+    # key phrase transfer
+    for key in commonWord:
+        if key in user_utter:
+            user_utter = user_utter.replace(key, commonWord[key])
+
+    user_utter = OpenCC('tw2sp').convert(user_utter)
+    print("簡問:", user_utter)
     result = db.users.find_one({ "_id": ObjectId(user_id) })
-    print(result)
     if result is None:
         return jsonify({'message':'User not found.'}), 400
 
     # get user current state from db
     current_state = db.states.find_one({ "user_id": ObjectId(user_id) })
-    # print(type(current_state))
     if current_state is not None:
         current_id = current_state.pop('_id', None)
         current_state.pop('user_id', None)
 
     # pipeline
-    sys_utter, next_state, recommend, select, taxi, hotel, site, restaurant = pipeline.reply(user_utter, current_state = current_state)
+    sys_utter, next_state, recommend, select, taxi, hotel, site, rest = pipeline.reply(user_utter, current_state = current_state)
 
     # store state in db
     next_state['user_id'] = ObjectId(user_id)
@@ -203,11 +208,9 @@ def sendMsg2Pipeline():
     for domain in ['taxi', 'rest', 'hotel', 'site']:
         exec(f"data[domain] = ({domain})")
     data['utter'] = sys_utter
-    
-    # todo: save state and data to db
-
     # after save utter to db, translate the sys utter to traditional chinese
-    data['utter'] = OpenCC('s2t').convert(sys_utter)
+    print("簡答:", sys_utter)
+    data['utter'] = OpenCC('s2twp').convert(sys_utter)
     
     return jsonify({'message':'ok', 'data': data}), 200
 
@@ -225,7 +228,8 @@ def restartSession():
     else:
         return jsonify({'message':'update failed.'}), 400
 
-# state = {'belief_state': {'出租': {'出发地': '', '目的地': ''},
+### state template
+# {'belief_state': {'出租': {'出发地': '', '目的地': ''},
 #                 '地铁': {'出发地': '', '目的地': ''},
 #                 '景点': {'名称': '',
 #                         '周边景点': '',
@@ -259,15 +263,6 @@ def restartSession():
 #                 ['Request', '餐馆', '名称', ''],
 #                 ['Inform', '餐馆', '推荐菜', '美食街'],
 #                 ['Inform', '餐馆', '人均消费', '50-100元']]}
-
-# state_id = db.states.insert_one(state)
-# print(state_id)
-
-# a = db.states.find_one({ "cur_domain": "餐馆" })
-# print(a)
-
-
-    
 
 if __name__ == '__main__':
     app.run()
