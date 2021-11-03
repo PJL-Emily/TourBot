@@ -1,24 +1,61 @@
 import React, { Component } from 'react';
 import { Map, GoogleApiWrapper, InfoWindow, Marker } from 'google-maps-react';
+import getGeocode from '../../../services/map.service';
 
 const mapStyles = {
-  width: '100%',
-  height: '100%'
+    width: '55%',
+    height: '80%',
+    position: 'relative',
+    left: 0
 };
 
 export class MapContainer extends Component {
-    state = {
-        showingInfoWindow: false,  // Hides or shows the InfoWindow
-        activeMarker: {},          // Shows the active marker upon click
-        selectedPlace: {}          // Shows the InfoWindow to the selected place upon a marker
-    };
+    constructor(props) {
+        super();
+        let { locations } = props;
+        this.state = {
+            showingInfoWindow: false,
+            activeMarker: {},
+            selectedPlace: {},
+            locations: locations,
+            markers: []
+        };
+    }
 
-    onMarkerClick = (props, marker, e) =>
-    this.setState({
-      selectedPlace: props,
-      activeMarker: marker,
-      showingInfoWindow: true
-    });
+    fetchGeocode() {
+        const setGeocodeList = async () => {
+            for(let i = 0; i < this.state.locations.length; i++) {
+                getGeocode(this.state.locations[i])
+                .then((results) => {
+                    // console.log("results", results);
+                    this.setState({
+                        markers: [...this.state.markers, {
+                            lat: results.geometry.location.lat,
+                            lng: results.geometry.location.lng,
+                            name: this.state.locations[i].name
+                        }]
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+            }
+        };
+        
+        setGeocodeList();
+    }
+
+    componentDidMount() {
+        this.fetchGeocode();
+    }
+
+    onMarkerClick = (props, marker, e) => {
+        this.setState({
+        selectedPlace: props,
+        activeMarker: marker,
+        showingInfoWindow: true
+        });
+    };
 
     onClose = props => {
         if (this.state.showingInfoWindow) {
@@ -29,33 +66,42 @@ export class MapContainer extends Component {
     }};
 
     render() {
-        return (
-        <Map
-            google={this.props.google}
-            zoom={14}
-            style={mapStyles}
-            initialCenter={
-            {
-                lat: -1.2884,
-                lng: 36.8233
-            }
-            }
-        >
-            <Marker
-                onClick={this.onMarkerClick}
-                name={'Kenyatta International Convention Centre'}
-            />
-            <InfoWindow
-                marker={this.state.activeMarker}
-                visible={this.state.showingInfoWindow}
-                onClose={this.onClose}
-            >
-                <div>
-                    <h4>{this.state.selectedPlace.name}</h4>
-                </div>
-            </InfoWindow>
-        </Map>
-        );
+        // console.log("locations", this.state.markers);
+        if(this.state.markers.length > 0) {
+            return (
+                <Map
+                    google={this.props.google}
+                    zoom={11}
+                    style={mapStyles}
+                    initialCenter={{
+                        lat: this.state.markers[0].lat,
+                        lng: this.state.markers[0].lng
+                    }}
+                >
+                    {this.state.markers.map(marker => (
+                        <Marker
+                            onClick={this.onMarkerClick}
+                            position={{ lat: marker.lat, lng: marker.lng }}
+                            name={marker.name}
+                            key={marker.name}
+                        />
+                        
+                    ))}
+                    <InfoWindow
+                        marker={this.state.activeMarker}
+                        visible={this.state.showingInfoWindow}
+                        onClose={this.onClose}
+                    >
+                        <div>
+                            <h4>{this.state.selectedPlace.name}</h4>
+                        </div>
+                    </InfoWindow>
+                </Map>
+            );
+        }
+        else {
+            return null;
+        }
     }
 }
 

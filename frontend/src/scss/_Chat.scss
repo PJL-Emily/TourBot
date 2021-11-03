@@ -197,7 +197,7 @@
             }
         }
         .info-btn[is-flashing="true"] {
-            animation: flashing 1500ms linear infinite;
+            animation: flashing 1000ms linear infinite;
         }
         .preview-btn{
             background-color: $orange;

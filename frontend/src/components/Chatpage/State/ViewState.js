@@ -25,9 +25,23 @@ function StateModal () {
 
     return (
         <div class="state-ctnr">
-            {/* <GoogleApiWrapper>
-                
-            </GoogleApiWrapper> */}
+            <GoogleApiWrapper
+                locations={[
+                    {
+                        name: "北京贵都大酒店",
+                        addr: "北京西城区广安门内大街217号"
+                    },
+                    {
+                        name: "北京鹏润国际大酒店",
+                        addr: "北京朝阳区霄云路26号"
+                    },
+                    // {
+                    //     name: "瑞尔威连锁饭店(北京西客站店)",
+                    //     addr: "北京丰台区莲花池东路116-2号"
+                    // }
+                ]}
+            >
+            </GoogleApiWrapper>
             <ul className="state-list">
                 <li>
                     <span className="material-icons Chat btn">bed</span>
@@ -80,9 +94,14 @@ const ViewState = () => {
                 </span>
             </button>
             <Modal
-                // className="info-modal"
-                // style={{ top: 15 }}
-                // width={600}
+                className="info-modal"
+                centered={true}
+                width={800}
+                bodyStyle={{
+                    padding: "20px",
+                    height: "500px",
+                    
+                }}
                 title={"您目前的對話進度"}
                 visible={visible}
                 onCancel={() => {

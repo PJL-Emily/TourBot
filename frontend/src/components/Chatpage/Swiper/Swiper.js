@@ -127,17 +127,12 @@ const ViewItem = ({type, effect}) => {
     '景點': ['museum-btn', 'museum']
   }
 
-  // console.log("in swiper type", type, " effect = ", effect);
   var btnClass = "info-btn " + icon_dict[type][0];
   useEffect(() => {
     if (!isFirstRender) {
-      // console.log('Subsequent Render');
       setIsFlashing(true);
-      setTimeout(() => setIsFlashing(false), 3000);
+      setTimeout(() => setIsFlashing(false), 5000);
     }
-    // else {
-    //   console.log('First Render');
-    // }
   }, [effect]);
 
   return (
