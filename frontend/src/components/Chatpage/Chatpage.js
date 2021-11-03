@@ -1,7 +1,7 @@
 import logo from '../../img/logo.png';
 import 'antd/dist/antd.css';
 import '../../scss/main.scss';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import MessageList from './MessageList';
 import { useIdleTimer } from 'react-idle-timer';
 import { Link, useHistory } from 'react-router-dom';
@@ -31,7 +31,7 @@ function Chatpage () {
       .catch((err) => {
           console.log(err);
       }); 
-      // window.location.reload(false);
+      window.location.reload(false);
     }
   }
 
@@ -95,7 +95,9 @@ function Chatpage () {
         setNewMessage('');
 
         // response
-        const reMessage = {fromMe: false, text: "我是機器人", time: time};
+        const sysMsg = data.data.utter;
+        console.log('System message = ', sysMsg)
+        const reMessage = {fromMe: false, text: sysMsg, time: time};
         setThreads((threads) =>
         [...threads, reMessage]
         );
@@ -108,15 +110,15 @@ function Chatpage () {
 
             console.log('sendUserUtter error: ', resMessage);
             //TEST
-            alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
-            setThreads((threads) =>
-            [...threads, addMessage]
-            );
-            setNewMessage('');
-            const reMessage = {fromMe: false, text: "我是機器人", time: time};
-            setThreads((threads) =>
-            [...threads, reMessage]
-            );
+            // alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
+            // setThreads((threads) =>
+            // [...threads, addMessage]
+            // );
+            // setNewMessage('');
+            // const reMessage = {fromMe: false, text: "我是機器人", time: time};
+            // setThreads((threads) =>
+            // [...threads, reMessage]
+            // );
             //
       })
 
@@ -144,7 +146,8 @@ function Chatpage () {
         setNewMessage('');
         
         // response
-        const reMessage = {fromMe: false, text: "我是機器人", time: time};
+        const sysMsg = data.data.utter;
+        const reMessage = {fromMe: false, text: sysMsg, time: time};
         setThreads((threads) =>
         [...threads, reMessage]
         );
@@ -157,15 +160,15 @@ function Chatpage () {
 
             console.log('sendUserUtter error: ', resMessage);
             //TEST
-            alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
-            setThreads((threads) =>
-            [...threads, addMessage]
-            );
-            setNewMessage('');
-            const reMessage = {fromMe: false, text: "我是機器人", time: time};
-            setThreads((threads) =>
-            [...threads, reMessage]
-            );
+            // alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
+            // setThreads((threads) =>
+            // [...threads, addMessage]
+            // );
+            // setNewMessage('');
+            // const reMessage = {fromMe: false, text: "我是機器人", time: time};
+            // setThreads((threads) =>
+            // [...threads, reMessage]
+            // );
             //
       })
 
@@ -184,6 +187,13 @@ function Chatpage () {
     ]
   )
 
+  // Scroll the chatroom
+  const messagesEndRef = useRef(null)
+
+  useEffect(() =>{
+    messagesEndRef.current.scrollIntoView({ behavior: 'smooth'});
+  });
+
   return (
 
     <div className="App chatpage">
@@ -193,6 +203,7 @@ function Chatpage () {
               <div className="Chat chatbox">
                 <div className="message-list">
                   <MessageList threads={threads}/>
+                  <div ref={messagesEndRef} />
                 </div>
               </div>
               <div className="Chat inputForm">
