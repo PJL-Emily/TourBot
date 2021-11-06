@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from serpapi import GoogleSearch
 from convlab2.dialog_agent.pipeline import Pipeline
 from opencc import OpenCC
-import re
 
 class MongoJSONEncoder(JSONEncoder):
     def default(self, obj): 
@@ -84,7 +83,7 @@ def submitUserInfo():
 def getUserState():
     try:
         user_id = request.get_json(force=True) ["user_id"]
-        state = db.states.find_one({"_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
+        state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
 
         if state is None :
             return jsonify({'message':'User belief state not exists.'}), 400
@@ -114,7 +113,7 @@ def getUserState():
 def getHotelInfo():
     try:
         user_id = request.get_json(force=True)['user_id']
-        belief_state = db.states.find_one({"_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
+        belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
 
         if belief_state is None:
             return jsonify({'message':'User belief state not exists.'}), 400
@@ -129,7 +128,9 @@ def getHotelInfo():
         hotel_to_tw = {}
         for key in hotel:
             new_key = OpenCC('s2twp').convert(key)
-            if type(hotel[key]) == int or type(hotel[key]) == float :
+            if hotel[key] is None:
+                hotel_to_tw.update({new_key:"無"})
+            elif type(hotel[key]) == int or type(hotel[key]) == float :
                 new = hotel[key]
             elif type(hotel[key]) == list:
                 new = [OpenCC('s2twp').convert(i) for i in hotel[key]]
@@ -150,8 +151,7 @@ def getHotelInfo():
 def getSiteInfo():
     try:
         user_id = request.get_json(force=True)['user_id']
-        belief_state = db.states.find_one({"_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
-
+        belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         if belief_state is None:
             return jsonify({'message':'User belief state not exists.'}), 400
     
@@ -166,7 +166,9 @@ def getSiteInfo():
         site_to_tw = {}
         for key in site:
             new_key = OpenCC('s2twp').convert(key)
-            if type(site[key]) == int or type(site[key]) == float :
+            if site[key] is None:
+                site_to_tw.update({new_key:"無"})
+            elif type(site[key]) == int or type(site[key]) == float :
                 site_to_tw.update({new_key:site[key]})
             else:
                 new = OpenCC('s2twp').convert(site[key])
@@ -185,8 +187,7 @@ def getSiteInfo():
 def getRestInfo():
     try:
         user_id = request.get_json(force=True)['user_id']
-        belief_state = db.states.find_one({"_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
-
+        belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         if belief_state is None:
             return jsonify({'message':'User belief state not exists.'}), 400
 
@@ -201,7 +202,9 @@ def getRestInfo():
         rest_to_tw = {}
         for key in rest:
             new_key = OpenCC('s2twp').convert(key)
-            if type(rest[key]) == int or type(rest[key]) == float :
+            if rest[key] is None:
+                rest_to_tw.update({new_key:"無"})
+            elif type(rest[key]) == int or type(rest[key]) == float :
                 rest_to_tw.update({new_key:rest[key]})
             else:
                 new = OpenCC('s2twp').convert(rest[key])
