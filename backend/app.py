@@ -282,47 +282,16 @@ def restartSession():
         return jsonify({'message':'User not found.'}), 400
     
     # clear user state
-    result = db.users.update_one({ "_id": ObjectId(user_id) }, { "$set": { "state": {} } })
-    if (result == 1):
-        return jsonify({'message':'ok'}), 200
-    else:
+    result = db.states.delete_one({ "user_id": ObjectId(user_id) })
+    if (result is None):
         return jsonify({'message':'update failed.'}), 400
-
-### state template
-# {'belief_state': {'出租': {'出发地': '', '目的地': ''},
-#                 '地铁': {'出发地': '', '目的地': ''},
-#                 '景点': {'名称': '',
-#                         '周边景点': '',
-#                         '周边酒店': '',
-#                         '周边餐馆': '',
-#                         '游玩时间': '',
-#                         '评分': '',
-#                         '门票': ''},
-#                 '酒店': {'价格': '',
-#                         '名称': '',
-#                         '周边景点': '',
-#                         '周边酒店': '',
-#                         '周边餐馆': '',
-#                         '评分': '',
-#                         '酒店类型': '',
-#                         '酒店设施': ''},
-#                 '餐馆': {'人均消费': '50-100元',
-#                         '名称': '',
-#                         '周边景点': '',
-#                         '周边酒店': '',
-#                         '周边餐馆': '',
-#                         '推荐菜': '美食街',
-#                         '评分': ''}},
-# 'cur_domain': '餐馆',
-# 'history': [],
-# 'request_slots': [['餐馆', '名称']],
-# 'system_action': [],
-# 'terminated': False,
-# 'user_action': [['General', 'greet', 'none', 'none'],
-#                 ['General', 'thank', 'none', 'none'],
-#                 ['Request', '餐馆', '名称', ''],
-#                 ['Inform', '餐馆', '推荐菜', '美食街'],
-#                 ['Inform', '餐馆', '人均消费', '50-100元']]}
+    result = db.recommend.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "user_id": "" } })
+    if (result is None):
+        return jsonify({'message':'recommend update failed.'}), 400
+    result = db.select.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "user_id": "" } })
+    if (result is None):
+        return jsonify({'message':'select update failed.'}), 400
+    return jsonify({'message':'ok'}), 200
 
 if __name__ == '__main__':
     app.run()
