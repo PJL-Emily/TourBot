@@ -83,7 +83,9 @@ def submitUserInfo():
 @app.route('/getUserState', methods=['GET'])
 def getUserState():
     try:
-        user_id = request.get_json(force=True) ["user_id"]
+        user_id = request.args.get("user_id")
+        # test
+        # print("user_id: ", user_id)
         state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
 
         if state is None :
@@ -113,7 +115,7 @@ def getUserState():
 @app.route('/getHotelInfo', methods=['GET'])
 def getHotelInfo():
     try:
-        user_id = request.get_json(force=True)['user_id']
+        user_id = request.args.get("user_id")
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
 
         if belief_state is None:
@@ -151,7 +153,7 @@ def getHotelInfo():
 @app.route('/getSiteInfo', methods=['GET'])
 def getSiteInfo():
     try:
-        user_id = request.get_json(force=True)['user_id']
+        user_id = request.args.get("user_id")
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         if belief_state is None:
             return jsonify({'message':'User belief state not exists.'}), 400
@@ -187,7 +189,7 @@ def getSiteInfo():
 @app.route('/getRestInfo', methods=['GET'])
 def getRestInfo():
     try:
-        user_id = request.get_json(force=True)['user_id']
+        user_id = request.args.get("user_id")
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         if belief_state is None:
             return jsonify({'message':'User belief state not exists.'}), 400

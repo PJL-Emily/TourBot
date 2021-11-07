@@ -31,7 +31,7 @@ function Chatpage () {
       .catch((err) => {
           console.log(err);
       }); 
-      window.location.reload(false);
+      // window.location.reload(false);
     }
   }
 
@@ -41,6 +41,7 @@ function Chatpage () {
       event.preventDefault();
     }
     else {
+      Service.exit();
       console.clear();
     }
   }

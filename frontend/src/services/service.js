@@ -31,12 +31,17 @@ const sendUserUtter = async (utterance) => {
 const restart = async () => {
     var data = { user_id: TokenService.getUser().user_id };
     // var data = { user_id: "test_id" };
-    console.log("restart: data ", data);
+
     const response = await api
         .post("restartSession", data);
 
+    console.log("restart", response);
     return response.data;
 };
+
+const exit = () => {
+    TokenService.removeUser();
+}
 
 const getUserState = async () => {
     var data = { user_id: TokenService.getUser().user_id };
@@ -44,7 +49,7 @@ const getUserState = async () => {
     // var data = { user_id: "test_id" };
 
     const response = await api
-        .get("getUserState", data);
+        .get("getUserState", {params: data});
     
     return response.data;
 };
@@ -52,9 +57,10 @@ const getUserState = async () => {
 const getHotelInfo = async () => {
     var data = { user_id: TokenService.getUser().user_id };
     // var data = { user_id: "test_id" };
+    console.log("data: ", data);
 
     const response = await api
-        .get("getHotelInfo", data);
+        .get("getHotelInfo", {params: data});
 
     return response.data;
 };
@@ -64,7 +70,7 @@ const getSiteInfo = async () => {
     // var data = { user_id: "test_id" };
 
     const response = await api
-        .get("getSiteInfo", data);
+        .get("getSiteInfo", {params: data});
 
     return response.data;
 };
@@ -74,16 +80,16 @@ const getRestInfo = async () => {
     // var data = { user_id: "test_id" };
 
     const response = await api
-        .get("getRestInfo", data);
+        .get("getRestInfo", {params: data});
 
     return response.data;
 };
-
 
 const Service = {
     submitUserInfo,
     sendUserUtter,
     restart,
+    exit,
     getUserState,
     getHotelInfo,
     getSiteInfo,
