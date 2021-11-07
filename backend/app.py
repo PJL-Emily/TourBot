@@ -274,7 +274,7 @@ def sendMsg2Pipeline():
     
     return jsonify({'message':'ok', 'data': data}), 200
 
-@app.route('/restartSession' , methods=['POST'])
+@app.route('/restartSession', methods=['POST'])
 def restartSession():
     user_id = request.get_json(force=True)['user_id']
     result = db.users.find_one({ "_id": ObjectId(user_id) })
@@ -283,13 +283,13 @@ def restartSession():
     
     # clear user state
     result = db.states.delete_one({ "user_id": ObjectId(user_id) })
-    if (result is None):
+    if (result.deleted_count is not 1):
         return jsonify({'message':'update failed.'}), 400
     result = db.recommend.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "user_id": "" } })
-    if (result is None):
+    if (result.modified_count is not 1):
         return jsonify({'message':'recommend update failed.'}), 400
     result = db.select.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "user_id": "" } })
-    if (result is None):
+    if (result.modified_count is not 1):
         return jsonify({'message':'select update failed.'}), 400
     return jsonify({'message':'ok'}), 200
 
