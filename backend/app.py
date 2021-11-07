@@ -26,7 +26,7 @@ client = pymongo.MongoClient(MONGO_URI)
 db = client.TourBot
 
 # initial pipeline model
-pipeline = Pipeline()
+# pipeline = Pipeline()
 
 def googleSearchLink(query):
     try:
@@ -197,7 +197,7 @@ def getRestInfo():
         {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '营业时间': 1, '人均消费': 1})
 
         if rest is None :
-            return jsonify({'message':'Restaurant name not exists.'}), 400
+            return jsonify({'message': 'Restaurant name not exists.'}), 400
         
         # 簡轉繁
         rest_to_tw = {}
@@ -216,64 +216,64 @@ def getRestInfo():
         img = googleSearchImg(name)
         rest_to_tw.update({"img": img, "search_results": links})
 
-        return jsonify({'message':'ok',  'data':rest_to_tw}), 200
+        return jsonify({'message':'ok', 'data':rest_to_tw}), 200
     except:
         return jsonify({'message':'Failed to get rest info.'}), 400
 
 commonWord = {}
 commonWord['飯店'] = "酒店"
 
-@app.route('/sendUserUtter', methods=['POST'])
-def sendMsg2Pipeline():
-    user_id = request.get_json(force=True)['user_id']
-    user_utter = request.get_json(force=True)['msg']
+# @app.route('/sendUserUtter', methods=['POST'])
+# def sendMsg2Pipeline():
+#     user_id = request.get_json(force=True)['user_id']
+#     user_utter = request.get_json(force=True)['msg']
 
-    # key phrase transfer
-    for key in commonWord:
-        if key in user_utter:
-            user_utter = user_utter.replace(key, commonWord[key])
+#     # key phrase transfer
+#     for key in commonWord:
+#         if key in user_utter:
+#             user_utter = user_utter.replace(key, commonWord[key])
 
-    user_utter = OpenCC('tw2sp').convert(user_utter)
-    print("簡問:", user_utter)
-    result = db.users.find_one({ "_id": ObjectId(user_id) })
-    if result is None:
-        return jsonify({'message':'User not found.'}), 400
+#     user_utter = OpenCC('tw2sp').convert(user_utter)
+#     print("簡問:", user_utter)
+#     result = db.users.find_one({ "_id": ObjectId(user_id) })
+#     if result is None:
+#         return jsonify({'message':'User not found.'}), 400
 
-    # get user current state from db
-    current_state = db.states.find_one({ "user_id": ObjectId(user_id) })
-    if current_state != None:
-        current_id = current_state.pop('_id', None)
-        current_state.pop('user_id', None)
+#     # get user current state from db
+#     current_state = db.states.find_one({ "user_id": ObjectId(user_id) })
+#     if current_state != None:
+#         current_id = current_state.pop('_id', None)
+#         current_state.pop('user_id', None)
 
-    # pipeline
-    sys_utter, next_state, recommend, select, taxi, hotel, site, rest = pipeline.reply(user_utter, current_state = current_state)
+#     # pipeline
+#     sys_utter, next_state, recommend, select, taxi, hotel, site, rest = pipeline.reply(user_utter, current_state = current_state)
 
-    # store state in db
-    next_state['user_id'] = ObjectId(user_id)
-    if current_state == None:
-        state_id = db.states.insert_one(next_state)
-    else:
-        myquery = { "_id": ObjectId(current_id) }
-        newvalues = { "$set": next_state }
-        db.states.update_one(myquery, newvalues)
+#     # store state in db
+#     next_state['user_id'] = ObjectId(user_id)
+#     if current_state == None:
+#         state_id = db.states.insert_one(next_state)
+#     else:
+#         myquery = { "_id": ObjectId(current_id) }
+#         newvalues = { "$set": next_state }
+#         db.states.update_one(myquery, newvalues)
 
-    # store recommend, select in db
-    for item in recommend:
-        item['user_id'] = ObjectId(user_id)
-        db.recommend.insert_one(item) 
-    for item in select:
-        item['user_id'] = ObjectId(user_id)
-        db.select.insert_one(item) 
+#     # store recommend, select in db
+#     for item in recommend:
+#         item['user_id'] = ObjectId(user_id)
+#         db.recommend.insert_one(item) 
+#     for item in select:
+#         item['user_id'] = ObjectId(user_id)
+#         db.select.insert_one(item) 
     
-    data = {}
-    for domain in ['taxi', 'rest', 'hotel', 'site']:
-        exec(f"data[domain] = ({domain})")
-    data['utter'] = sys_utter
-    # after save utter to db, translate the sys utter to traditional chinese
-    print("簡答:", sys_utter)
-    data['utter'] = OpenCC('s2twp').convert(sys_utter)
+#     data = {}
+#     for domain in ['taxi', 'rest', 'hotel', 'site']:
+#         exec(f"data[domain] = ({domain})")
+#     data['utter'] = sys_utter
+#     # after save utter to db, translate the sys utter to traditional chinese
+#     print("簡答:", sys_utter)
+#     data['utter'] = OpenCC('s2twp').convert(sys_utter)
     
-    return jsonify({'message':'ok', 'data': data}), 200
+#     return jsonify({'message':'ok', 'data': data}), 200
 
 @app.route('/restartSession', methods=['POST'])
 def restartSession():
@@ -283,17 +283,23 @@ def restartSession():
         return jsonify({'message':'User not found.'}), 400
     
     # clear user state (update to default state)
-    result = db.states.update_one({ "user_id": ObjectId(user_id) }, { "$set": default_state() })
-    if (result.modified_count != 1):
-        return jsonify({'message':'state update failed.'}), 400
+    try: 
+        result = db.states.update_one({ "user_id": ObjectId(user_id) }, { "$set": default_state() })
+        print("state update count:", result.modified_count)
+    except:
+        return jsonify({'message': 'state update failed.'}), 400
     # replace user id of recommend as null
-    result = db.recommend.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "user_id": "" } })
-    if (result.modified_count != 1):
-        return jsonify({'message':'recommend update failed.'}), 400
+    try: 
+        result = db.recommend.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "expired": True } })
+        print("recommend update count:", result.modified_count)
+    except: 
+        return jsonify({'message': 'recommend update failed.'}), 400
     # replace user id of select as null
-    result = db.select.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "user_id": "" } })
-    if (result.modified_count != 1):
-        return jsonify({'message':'select update failed.'}), 400
+    try: 
+        result = db.select.update_one({ "user_id": ObjectId(user_id) }, { "$set": { "expired": True } })
+        print("select update count:", result.modified_count)
+    except: 
+        return jsonify({'message': 'select update failed.'}), 400
     return jsonify({'message':'ok'}), 200
 
 if __name__ == '__main__':
