@@ -260,13 +260,31 @@ def sendMsg2Pipeline():
         db.states.update_one(myquery, newvalues)
 
     # store recommend, select in db
-    for item in recommend:
-        item['user_id'] = ObjectId(user_id)
-        db.recommend.insert_one(item) 
-    for item in select:
-        item['user_id'] = ObjectId(user_id)
-        db.select.insert_one(item) 
-    
+    if len(recommend) != 0:
+        result = db.recommend.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        if result is None:
+            newRecommend = {}
+            newRecommend['user_id'] = ObjectId(user_id)
+            newRecommend['expired'] = False
+            newRecommend['content'] = recommend
+            db.recommend.insert_one(newRecommend)
+        else:
+            contentNow = result['content'] 
+            contentNow += recommend
+            db.recommend.update_one({ "user_id": ObjectId(user_id), "expired": False }, { "$set": { "content": contentNow } })
+    if len(select) != 0:
+        result = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        if result is None:
+            newSelect = {}
+            newSelect['user_id'] = ObjectId(user_id)
+            newSelect['expired'] = False
+            newSelect['content'] = select 
+            db.select.insert_one(newSelect)
+        else:
+            contentNow = result['content'] 
+            contentNow += select
+            db.select.update_one({ "user_id": ObjectId(user_id), "expired": False }, { "$set": { "content": contentNow } })
+
     data = {}
     for domain in ['taxi', 'rest', 'hotel', 'site']:
         exec(f"data[domain] = ({domain})")
