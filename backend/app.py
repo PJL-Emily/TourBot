@@ -65,6 +65,23 @@ def googleSearchImg(query):
     except:
         print("No image found.")
 
+def sp2tw(dict):
+    try:
+        result = {}
+        for key in dict:
+            new_key = OpenCC('s2twp').convert(key)
+            if dict[key] is None:
+                new = "無"
+            elif type(dict[key]) == int or type(dict[key]) == float :
+                new = dict[key]
+            elif type(dict[key]) == list:
+                new = [OpenCC('s2twp').convert(i) for i in dict[key]]
+            else:
+                new = OpenCC('s2twp').convert(dict[key])
+            result.update({new_key:new})
+        return result
+    except:
+        print("Fail to turn simplified chinese to mandarin.")
 
 @app.route('/submitUserInfo', methods=['POST'])
 def submitUserInfo():
@@ -82,145 +99,156 @@ def submitUserInfo():
 
 @app.route('/getUserState', methods=['GET'])
 def getUserState():
+    user_id = request.args.get("user_id")
+    
+    if user_id is None:
+        return jsonify({'message': 'Fail to get request parameter.'}), 400
+    # test
+    # print("user_id: ", user_id)
     try:
-        user_id = request.args.get("user_id")
-        # test
-        # print("user_id: ", user_id)
         state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
-
-        if state is None :
-            return jsonify({'message':'User belief state not exists.'}), 400
-
-        belief_state = state['belief_state']
-
-        user_state = {}
-        domain_set_en = ['hotel', 'site', 'rest']
-        domain_set_zh = ['酒店', '景点', '餐馆']
-        trans_set_en = ['taxi', 'sub']
-        trans_set_zh = ['出租', '地铁']
-
-        for i, domain in enumerate(domain_set_en):
-            value = belief_state[domain_set_zh[i]]['名称']
-            user_state[domain] = OpenCC('s2twp').convert(value)
-
-        for i, trans in enumerate(trans_set_en):
-            start = belief_state[trans_set_zh[i]]['出发地']
-            end = belief_state[trans_set_zh[i]]['目的地']
-            user_state[trans] = [OpenCC('s2twp').convert(start), OpenCC('s2twp').convert(end)]
-        
-        return jsonify({'message':'ok', 'data': user_state}), 200
     except:
-        return jsonify({'message':'Failed to get user state.'}), 400
+        return jsonify({'message': 'Fail to get state with user id {}.'.format(user_id)}), 400
+
+    if state is None :
+        return jsonify({'message':'User state not exists.'}), 200
+
+    belief_state = state['belief_state']
+
+    user_state = {}
+    domain_set_en = ['hotel', 'site', 'rest']
+    domain_set_zh = ['酒店', '景点', '餐馆']
+    trans_set_en = ['taxi', 'sub']
+    trans_set_zh = ['出租', '地铁']
+
+    for i, domain in enumerate(domain_set_en):
+        value = belief_state[domain_set_zh[i]]['名称']
+        user_state[domain] = OpenCC('s2twp').convert(value)
+
+    for i, trans in enumerate(trans_set_en):
+        start = belief_state[trans_set_zh[i]]['出发地']
+        end = belief_state[trans_set_zh[i]]['目的地']
+        user_state[trans] = [OpenCC('s2twp').convert(start), OpenCC('s2twp').convert(end)]
+    
+    return jsonify({'message':'ok', 'data': user_state}), 200
 
 @app.route('/getHotelInfo', methods=['GET'])
 def getHotelInfo():
+    show = {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '酒店设施': 1, '地铁': 1, '价格': 1}
+
+    user_id = request.args.get("user_id")
+
+    if user_id is None:
+        return jsonify({'message': 'Fail to get request parameter.'}), 400
+
     try:
-        user_id = request.args.get("user_id")
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
-
-        if belief_state is None:
-            return jsonify({'message':'User belief state not exists.'}), 400
-
-        name = belief_state['belief_state']['酒店']['名称']
-        hotel = db.hotels.find_one({"名称": name}, 
-        {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '酒店设施': 1, '地铁': 1, '价格': 1})
-        if hotel is None :
-            return jsonify({'message':'Hotel name not exists.'}), 400
-        
-        # 簡轉繁
-        hotel_to_tw = {}
-        for key in hotel:
-            new_key = OpenCC('s2twp').convert(key)
-            if hotel[key] is None:
-                hotel_to_tw.update({new_key:"無"})
-            elif type(hotel[key]) == int or type(hotel[key]) == float :
-                new = hotel[key]
-            elif type(hotel[key]) == list:
-                new = [OpenCC('s2twp').convert(i) for i in hotel[key]]
-            else:
-                new = OpenCC('s2twp').convert(hotel[key])
-            hotel_to_tw.update({new_key:new})
-
-        # google search result
-        links = googleSearchLink(name)
-        img = googleSearchImg(name)
-        hotel_to_tw.update({"img": img, "search_results":links})
-
-        return jsonify({'message':'ok', "data": hotel_to_tw}), 200
     except:
-        return jsonify({'message':'Failed to get hotel info.'}), 400
+        return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
+    
+    # check if user state exists
+    if belief_state is None:
+        return jsonify({'message':'User state not exists.'}), 200
+
+    name = belief_state['belief_state']['酒店']['名称']
+
+    # find site with hotel name in state
+    try: 
+        hotel = db.hotels.find_one({"名称": name}, show)
+    except:
+        return jsonify({'message':'Fail to find hotel with hotel name {}.'.formet(name)}), 400
+
+    if hotel is None :
+        return jsonify({'message':'Hotel name not exists.'}), 200
+
+    # simplified chinese to mandarin
+    hotel_to_tw = sp2tw(hotel)
+
+    # google search result
+    links = googleSearchLink(name)
+    img = googleSearchImg(name)
+    hotel_to_tw.update({"img": img, "search_results":links})
+
+    return jsonify({'message':'ok',  'data':hotel_to_tw}), 200
 
 @app.route('/getSiteInfo', methods=['GET'])
 def getSiteInfo():
+    show = {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '游玩时间': 1, '门票': 1}
+
+    user_id = request.args.get("user_id")
+
+    if user_id is None:
+        return jsonify({'message': 'Fail to get request parameter.'}), 400
+
     try:
-        user_id = request.args.get("user_id")
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
-        if belief_state is None:
-            return jsonify({'message':'User belief state not exists.'}), 400
-    
-        name = belief_state['belief_state']['景点']['名称']
-        site = db.attractions.find_one({"名称": name}, 
-        {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '游玩时间': 1, '门票': 1})
-
-        if site is None :
-            return jsonify({'message':'Site name not exists.'}), 400
-        
-        # 簡轉繁
-        site_to_tw = {}
-        for key in site:
-            new_key = OpenCC('s2twp').convert(key)
-            if site[key] is None:
-                site_to_tw.update({new_key:"無"})
-            elif type(site[key]) == int or type(site[key]) == float :
-                site_to_tw.update({new_key:site[key]})
-            else:
-                new = OpenCC('s2twp').convert(site[key])
-                site_to_tw.update({new_key:new})
-
-        # google search result
-        links = googleSearchLink(name)
-        img = googleSearchImg(name)
-        site_to_tw.update({"img": img, "search_results":links})
-
-        return jsonify({'message':'ok',  'data':site_to_tw}), 200
     except:
-        return jsonify({'message':'Failed to get site info.'}), 400
+        return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
+    
+    # check if user state exists
+    if belief_state is None:
+        return jsonify({'message':'User state not exists.'}), 200
+    
+    name = belief_state['belief_state']['景点']['名称']
+
+    # find site with site name in state
+    try: 
+        site = db.attractions.find_one({"名称": name}, show)
+    except:
+        return jsonify({'message':'Fail to find site with site name {}.'.formet(name)}), 400
+
+    if site is None :
+        return jsonify({'message':'Site name not exists.'}), 200
+
+    # simplified chinese to mandarin
+    site_to_tw = sp2tw(site)
+
+    # google search result
+    links = googleSearchLink(name)
+    img = googleSearchImg(name)
+    site_to_tw.update({"img": img, "search_results":links})
+
+    return jsonify({'message':'ok',  'data':site_to_tw}), 200
 
 @app.route('/getRestInfo', methods=['GET'])
 def getRestInfo():
+    show = {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '营业时间': 1, '人均消费': 1}
+
+    user_id = request.args.get("user_id")
+
+    if user_id is None:
+        return jsonify({'message': 'Fail to get request parameter.'}), 400
+
     try:
-        user_id = request.args.get("user_id")
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
-        if belief_state is None:
-            return jsonify({'message':'User belief state not exists.'}), 400
-
-        name = belief_state['belief_state']['餐馆']['名称']
-        rest = db.restaurants.find_one({"名称": name}, 
-        {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '营业时间': 1, '人均消费': 1})
-
-        if rest is None :
-            return jsonify({'message': 'Restaurant name not exists.'}), 400
-        
-        # 簡轉繁
-        rest_to_tw = {}
-        for key in rest:
-            new_key = OpenCC('s2twp').convert(key)
-            if rest[key] is None:
-                rest_to_tw.update({new_key:"無"})
-            elif type(rest[key]) == int or type(rest[key]) == float :
-                rest_to_tw.update({new_key:rest[key]})
-            else:
-                new = OpenCC('s2twp').convert(rest[key])
-                rest_to_tw.update({new_key:new})
-
-        # google search result
-        links = googleSearchLink(name)
-        img = googleSearchImg(name)
-        rest_to_tw.update({"img": img, "search_results": links})
-
-        return jsonify({'message':'ok', 'data':rest_to_tw}), 200
     except:
-        return jsonify({'message':'Failed to get rest info.'}), 400
+        return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
+    
+    # check if user state exists
+    if belief_state is None:
+        return jsonify({'message':'User state not exists.'}), 200
+    
+    name = belief_state['belief_state']['餐馆']['名称']
+
+    # find site with site name in state
+    try: 
+        rest = db.restaurants.find_one({"名称": name}, show)
+    except:
+        return jsonify({'message':'Fail to find restaurant with restaurant name {}.'.formet(name)}), 400
+
+    if rest is None :
+        return jsonify({'message':'Restaurant name not exists.'}), 200
+
+    # simplified chinese to mandarin
+    rest_to_tw = sp2tw(rest)
+
+    # google search result
+    links = googleSearchLink(name)
+    img = googleSearchImg(name)
+    rest_to_tw.update({"img": img, "search_results":links})
+
+    return jsonify({'message':'ok',  'data':rest_to_tw}), 200
+
 
 commonWord = {}
 commonWord['飯店'] = "酒店"
