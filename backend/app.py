@@ -237,12 +237,18 @@ def sendMsg2Pipeline():
 
     user_utter = OpenCC('tw2sp').convert(user_utter)
     print("簡問:", user_utter)
-    result = db.users.find_one({ "_id": ObjectId(user_id) })
+    try:
+        result = db.users.find_one({ "_id": ObjectId(user_id) })
+    except:
+        return jsonify({'message':'Finding user failed.'}), 400
     if result is None:
         return jsonify({'message':'User not found.'}), 400
 
     # get user current state from db
-    current_state = db.states.find_one({ "user_id": ObjectId(user_id) })
+    try: 
+        current_state = db.states.find_one({ "user_id": ObjectId(user_id) })
+    except: 
+        return jsonify({'message':'Finding user state failed.'}), 400
     if current_state != None:
         current_id = current_state.pop('_id', None)
         current_state.pop('user_id', None)
@@ -253,20 +259,62 @@ def sendMsg2Pipeline():
     # store state in db
     next_state['user_id'] = ObjectId(user_id)
     if current_state == None:
-        state_id = db.states.insert_one(next_state)
+        try:
+            state_id = db.states.insert_one(next_state)
+        except: 
+            return jsonify({'message':'Insert user state failed.'}), 400
     else:
         myquery = { "_id": ObjectId(current_id) }
         newvalues = { "$set": next_state }
-        db.states.update_one(myquery, newvalues)
+        try:
+            db.states.update_one(myquery, newvalues)
+        except:
+            return jsonify({'message':'Update user state failed.'}), 400
 
     # store recommend, select in db
-    for item in recommend:
-        item['user_id'] = ObjectId(user_id)
-        db.recommend.insert_one(item) 
-    for item in select:
-        item['user_id'] = ObjectId(user_id)
-        db.select.insert_one(item) 
-    
+    if len(recommend) != 0:
+        try:
+            result = db.recommend.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        except:
+            return jsonify({'message':'Finding user recommend failed.'}), 400
+        if result is None:
+            newRecommend = {}
+            newRecommend['user_id'] = ObjectId(user_id)
+            newRecommend['expired'] = False
+            newRecommend['content'] = recommend
+            try:
+                db.recommend.insert_one(newRecommend)
+            except:
+                return jsonify({'message':'Insert user recommend failed.'}), 400
+        else:
+            contentNow = result['content'] 
+            contentNow += recommend
+            try:
+                db.recommend.update_one({ "user_id": ObjectId(user_id), "expired": False }, { "$set": { "content": contentNow } })
+            except:
+                return jsonify({'message':'Update user recommend failed.'}), 400
+    if len(select) != 0:
+        try:
+            result = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        except:
+            return jsonify({'message':'Finding user select failed.'}), 400
+        if result is None:
+            newSelect = {}
+            newSelect['user_id'] = ObjectId(user_id)
+            newSelect['expired'] = False
+            newSelect['content'] = select 
+            try:
+                db.select.insert_one(newSelect)
+            except:
+                return jsonify({'message':'Insert user select failed.'}), 400
+        else:
+            contentNow = result['content'] 
+            contentNow += select
+            try:
+                db.select.update_one({ "user_id": ObjectId(user_id), "expired": False }, { "$set": { "content": contentNow } })
+            except:
+                return jsonify({'message':'Update user select failed.'}), 400
+
     data = {}
     for domain in ['taxi', 'rest', 'hotel', 'site']:
         exec(f"data[domain] = ({domain})")
