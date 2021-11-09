@@ -122,8 +122,33 @@ def getUserState():
     trans_set_zh = ['出租', '地铁']
 
     for i, domain in enumerate(domain_set_en):
-        value = belief_state[domain_set_zh[i]]['名称']
-        user_state[domain] = OpenCC('s2twp').convert(value)
+        name = belief_state[domain_set_zh[i]]['名称']
+
+        if name == "":
+            user_state[domain] = {'name': "", 'addr': ""}
+            continue
+    
+        name_to_tw = OpenCC('s2twp').convert(name)
+
+        if i == 0:
+            try:
+                addr = db.hotels.find_one({'名称':name}, {"_id": 0, "地址": 1})
+                print(addr)
+            except:
+                return jsonify({'message': 'Fail to get hotel address with hotel name {}.'.format(name_to_tw)}), 400
+        elif i == 1:
+            try:
+                addr = db.attractions.find_one({'名称':name}, {"_id": 0, "地址": 1})
+            except:
+                return jsonify({'message': 'Fail to get site address with site name {}.'.format(name_to_tw)}), 400
+        else:
+            try:
+                addr = db.restaurants.find_one({'名称':name}, {"_id": 0, "地址": 1})
+            except:
+                return jsonify({'message': 'Fail to get restaurant address with restaurant name {}.'.format(name_to_tw)}), 400
+    
+        addr_to_tw = OpenCC('s2twp').convert(addr['地址'])
+        user_state[domain] = {'name': name_to_tw, 'addr': addr_to_tw}
 
     for i, trans in enumerate(trans_set_en):
         start = belief_state[trans_set_zh[i]]['出发地']
