@@ -238,7 +238,7 @@ def sendMsg2Pipeline():
     user_utter = OpenCC('tw2sp').convert(user_utter)
     print("簡問:", user_utter)
     try:
-        result = db.users.find_one({ "_id": ObjectId(user_id) }
+        result = db.users.find_one({ "_id": ObjectId(user_id) })
     except:
         return jsonify({'message':'Finding user failed.'}), 400
     if result is None:
