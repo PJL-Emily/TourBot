@@ -32,7 +32,7 @@ const HotelInfo = (data) => {
             </div>
             <div className="item-context">
                 <span className="material-icons">attach_money</span>
-                <span>平均價位 {data.price}</span>
+                <span>平均價位 {data.price} 人民幣</span>
             </div>
         </div>
     );
@@ -69,7 +69,7 @@ const SiteInfo = (data) => {
             </div>
             <div className="item-context">
                 <span className="material-icons">schedule</span>
-                <span>遊玩時間約 {data.time}</span>
+                <span>遊玩時間約 {data.site_time}</span>
             </div>
             <div className="item-context">
                 <span className="material-icons">confirmation_number</span>
@@ -106,11 +106,11 @@ const RestInfo = (data) => {
             </div>
             <div className="item-context">
                 <span className="material-icons">schedule</span>
-                <span>遊玩時間約 {data.time}</span>
+                <span>營業時間 {data.open_time}</span>
             </div>
             <div className="item-context">
                 <span className="material-icons">attach_money</span>
-                <span>平均消費 {data.avg_spend}</span>
+                <span>平均消費 {data.avg_spend} 人民幣</span>
             </div>
         </div>
     );
@@ -124,6 +124,13 @@ const InfoCard = ({ type, data }) => {
     };
     const info = func_dict[type](data);
 
+    if(data.name === "") {
+        return (
+            <div className="info-card">
+                <p>目前還沒有任何結果哦！</p>
+            </div>
+        );
+    }
     return (
         <div className="info-card">
             <div 

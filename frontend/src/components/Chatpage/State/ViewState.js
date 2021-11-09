@@ -1,31 +1,14 @@
 import 'antd/dist/antd.css';
 import '../../../scss/main.scss';
-import { useState } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { Modal } from 'antd';
 import Service from "../../../services/service";
 import GoogleApiWrapper from "./Map";
 
-function StateModal () {
-    Service.getUserState()
-    .then((data) => {
-        console.log('Response data: ', data);
-        const state = data;
-    })
-    .catch((err) => {
-        console.log(err);
-    });
-
-    const state = {
-        hotel: '水晶酒店',
-        site: '遊樂園',
-        rest: '餛飩',
-        sub: ['A_spot', 'B_spot'],
-        taxi: ['taxi_A', 'taxi_B']
-    };
-
+function StateModal ({ dialState }) {
     return (
         <div class="state-ctnr">
-            <GoogleApiWrapper
+            {/* <GoogleApiWrapper
                 locations={[
                     {
                         name: "北京贵都大酒店",
@@ -41,32 +24,32 @@ function StateModal () {
                     // }
                 ]}
             >
-            </GoogleApiWrapper>
+            </GoogleApiWrapper> */}
             <ul className="state-list">
                 <li>
                     <span className="material-icons Chat btn">bed</span>
-                    {state.hotel}
+                    {dialState.hotel}
                     
                 </li>
                 <li>
                     <span className="material-icons Chat btn">museum</span>
-                    {state.site}
+                    {dialState.site}
                 </li>
                 <li>
                     <span className="material-icons Chat btn">restaurant_menu</span>
-                    {state.rest}
+                    {dialState.rest}
                 </li>
                 <li>
                     <span className="material-icons Chat btn">subway</span>
-                    {state.sub[0]}
+                    {dialState.sub[0]}
                     <span className="material-icons Chat btn">arrow_forward</span>
-                    {state.sub[1]}
+                    {dialState.sub[1]}
                 </li>
                 <li>
                     <span className="material-icons Chat btn">local_taxi</span>
-                    {state.taxi[0]}
+                    {dialState.taxi[0]}
                     <span className="material-icons Chat btn">arrow_forward</span>
-                    {state.taxi[1]}
+                    {dialState.taxi[1]}
                 </li>
             </ul>
         </div>
@@ -76,6 +59,65 @@ function StateModal () {
 
 const ViewState = () => {
     const [visible, setVisible] = useState(false);
+    const [renderCnt, setRenderCnt] = useState(0);
+    const [dialState, setDialState] = useState({
+        hotel: "",
+        site: "",
+        rest: "",
+        sub: ["", ""],
+        taxi: ["", ""]
+    });
+    // const [locations, setLocations] = useState([]);
+
+    const fetchState = useCallback(async () => {
+        Service.getUserState()
+        .then((data) => {
+            console.log('Response data: ', data);
+            var state = data.data;
+            if(state.hotel === "") {
+                state.hotel = "未定";
+            }
+            if(state.site === "") {
+                state.site = "未定";
+            }
+            if(state.rest === "") {
+                state.rest = "未定";
+            }
+            if(state.sub[0] === "") {
+                state.sub[0] = "未定";
+            }
+            if(state.sub[1] === "") {
+                state.sub[1] = "未定";
+            }
+            if(state.taxi[0] === "") {
+                state.taxi[0] = "未定";
+            }
+            if(state.taxi[1] === "") {
+                state.taxi[1] = "未定";
+            }
+            setDialState(state);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }, [dialState, setDialState]);
+
+    useEffect(() => {
+        fetchState();
+
+        // set locations
+        // var temp = [];
+        // if(dialState.hotel !== "") {
+        //     temp = [...temp, dialState.hotel];
+        // }
+        // if(dialState.site !== "") {
+        //     temp = [...temp, dialState.site];
+        // }
+        // if(dialState.rest !== "") {
+        //     temp = [...temp, dialState.rest];
+        // }
+        // setLocations(temp);
+    }, [renderCnt]);
 
     return (
         <div>
@@ -84,6 +126,7 @@ const ViewState = () => {
                 onClick={event => {
                     event.preventDefault();
                     setVisible(true);
+                    setRenderCnt((renderCnt) => renderCnt + 1);
                 }}
             >
                 <span className="material-icons Chat btn">
@@ -109,7 +152,7 @@ const ViewState = () => {
                 }}
                 footer={null}
             >
-                <StateModal />
+                <StateModal dialState={dialState}/>
             </Modal>
         </div>
     );
