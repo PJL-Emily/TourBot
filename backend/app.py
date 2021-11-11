@@ -171,9 +171,9 @@ def getHotelInfo():
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         # check if user state exists
         if belief_state is None:
-            return jsonify({'message':'User state not exists.'}), 200
+            return jsonify({'message': 'User state not exists.'}), 200
     except:
-        return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
+        return jsonify({'message': 'Fail to find state with user id {}.'.format(user_id)}), 400
 
     name = belief_state['belief_state']['酒店']['名称']
 
@@ -185,13 +185,13 @@ def getHotelInfo():
         if hotel is not None :
             result.append(hotel)
     except:
-        return jsonify({'message':'Fail to find hotel with hotel name {}.'.formet(name)}), 400
+        return jsonify({'message': 'Fail to find hotel with hotel name {}.'.formet(name)}), 400
 
     # get history hotel info
     try:
-        select = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        select = db.select.find_one({"user_id": ObjectId(user_id), "expired": False})
     except:
-        return jsonify({'message':'Fail to get history hotels with user id {}.'.format(user_id)}), 400
+        return jsonify({'message': 'Fail to get history hotels with user id {}.'.format(user_id)}), 400
 
     if select is not None:
         history = select['content']
@@ -207,10 +207,10 @@ def getHotelInfo():
                     if temp is not None:
                         result.append(temp)
             except:
-                return jsonify({'message':'Fail to find hotel with hotel name {}.'.formet(n)}), 400
+                return jsonify({'message': 'Fail to find hotel with hotel name {}.'.formet(n)}), 400
 
     if len(result) == 0:
-        return jsonify({'message':'No hotel exists in user state and history.'}), 200
+        return jsonify({'message': 'No hotel exists in user state and history.'}), 200
 
     result_to_tw = []
 
@@ -222,11 +222,11 @@ def getHotelInfo():
         # google search result
         links = googleSearchLink(obj['名称'])
         img = googleSearchImg(obj['名称'])
-        obj_to_tw.update({"img": img, "search_results":links})
+        obj_to_tw.update({"img": img, "search_results": links})
 
         result_to_tw.append(obj_to_tw)
 
-    return jsonify({'message':'ok',  'data':result_to_tw}), 200
+    return jsonify({'message': 'ok',  'data': result_to_tw}), 200
 
 @app.route('/getSiteInfo', methods=['GET'])
 def getSiteInfo():
@@ -243,9 +243,9 @@ def getSiteInfo():
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         # check if user state exists
         if belief_state is None:
-            return jsonify({'message':'User state not exists.'}), 200
+            return jsonify({'message': 'User state not exists.'}), 200
     except:
-        return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
+        return jsonify({'message': 'Fail to find state with user id {}.'.format(user_id)}), 400
     
     name = belief_state['belief_state']['景点']['名称']
     
@@ -257,13 +257,13 @@ def getSiteInfo():
         if site is not None :
             result.append(site)
     except:
-        return jsonify({'message':'Fail to find sites with site name {}.'.formet(name)}), 400
+        return jsonify({'message': 'Fail to find sites with site name {}.'.formet(name)}), 400
 
     # get history site info
     try:
-        select = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        select = db.select.find_one({"user_id": ObjectId(user_id), "expired": False})
     except:
-        return jsonify({'message':'Fail to get history site with user id {}.'.format(user_id)}), 400
+        return jsonify({'message': 'Fail to get history site with user id {}.'.format(user_id)}), 400
 
     if select is not None:
         history = select['content']
@@ -280,10 +280,10 @@ def getSiteInfo():
                     if temp is not None:
                         result.append(temp)
                 except:
-                    return jsonify({'message':'Fail to find site with site name {}.'.formet(n)}), 400
+                    return jsonify({'message': 'Fail to find site with site name {}.'.formet(n)}), 400
 
     if len(result) == 0:
-        return jsonify({'message':'No site exists in user state and history.'}), 200
+        return jsonify({'message': 'No site exists in user state and history.'}), 200
 
     result_to_tw = []
 
@@ -316,13 +316,13 @@ def getRestInfo():
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
         # check if user state exists
         if belief_state is None:
-            return jsonify({'message':'User state not exists.'}), 200
+            return jsonify({'message': 'User state not exists.'}), 200
     except:
-        return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
+        return jsonify({'message': 'Fail to find state with user id {}.'.format(user_id)}), 400
     
     name = belief_state['belief_state']['餐馆']['名称']
 
-    # find site with site name in state
+    # find rest with rest name in state
     try: 
         rest = db.restaurants.find_one({"名称": name}, show)
         # if rest is None :
@@ -330,13 +330,13 @@ def getRestInfo():
         if rest is not None :
             result.append(rest)
     except:
-        return jsonify({'message':'Fail to find restaurant with restaurant name {}.'.formet(name)}), 400
+        return jsonify({'message': 'Fail to find restaurant with restaurant name {}.'.formet(name)}), 400
 
     # get history rest info
     try:
-        select = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+        select = db.select.find_one({"user_id": ObjectId(user_id), "expired": False})
     except:
-        return jsonify({'message':'Fail to get history restaurants with user id {}.'.format(user_id)}), 400
+        return jsonify({'message': 'Fail to get history restaurants with user id {}.'.format(user_id)}), 400
 
     if select is not None:
         history = select['content']
@@ -353,10 +353,10 @@ def getRestInfo():
                     if temp is not None:
                         result.append(temp)
                 except:
-                    return jsonify({'message':'Fail to find site with site name {}.'.formet(n)}), 400
+                    return jsonify({'message': 'Fail to find restaurant with restaurant name {}.'.formet(n)}), 400
 
     if len(result) == 0:
-        return jsonify({'message':'No rest exists in user state and history.'}), 200
+        return jsonify({'message': 'No restaurant exists in user state and history.'}), 200
 
     result_to_tw = []
 
@@ -372,7 +372,7 @@ def getRestInfo():
 
         result_to_tw.append(obj_to_tw)
 
-    return jsonify({'message':'ok',  'data':result_to_tw}), 200
+    return jsonify({'message': 'ok',  'data': result_to_tw}), 200
 
 
 commonWord = {}
