@@ -133,7 +133,6 @@ def getUserState():
         if i == 0:
             try:
                 addr = db.hotels.find_one({'名称':name}, {"_id": 0, "地址": 1})
-                print(addr)
             except:
                 return jsonify({'message': 'Fail to get hotel address with hotel name {}.'.format(name_to_tw)}), 400
         elif i == 1:
@@ -159,6 +158,7 @@ def getUserState():
 
 @app.route('/getHotelInfo', methods=['GET'])
 def getHotelInfo():
+    result = []
     show = {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '酒店设施': 1, '地铁': 1, '价格': 1}
 
     user_id = request.args.get("user_id")
@@ -166,38 +166,71 @@ def getHotelInfo():
     if user_id is None:
         return jsonify({'message': 'Fail to get request parameter.'}), 400
 
+    # get current state hotel info
     try:
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
+        # check if user state exists
+        if belief_state is None:
+            return jsonify({'message':'User state not exists.'}), 200
     except:
         return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
-    
-    # check if user state exists
-    if belief_state is None:
-        return jsonify({'message':'User state not exists.'}), 200
 
     name = belief_state['belief_state']['酒店']['名称']
 
-    # find site with hotel name in state
+    # find hotel with hotel name in state
     try: 
         hotel = db.hotels.find_one({"名称": name}, show)
+        # if hotel is None :
+        #     return jsonify({'message':'Hotel name not exists.'}), 200
+        if hotel is not None :
+            result.append(hotel)
     except:
         return jsonify({'message':'Fail to find hotel with hotel name {}.'.formet(name)}), 400
 
-    if hotel is None :
-        return jsonify({'message':'Hotel name not exists.'}), 200
+    # get history hotel info
+    try:
+        select = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+    except:
+        return jsonify({'message':'Fail to get history hotels with user id {}.'.format(user_id)}), 400
 
-    # simplified chinese to mandarin
-    hotel_to_tw = sp2tw(hotel)
+    if select is not None:
+        history = select['content']
+        hotels = [x['name'] for x in history if x['domain'] == '酒店']
+        # get unique values of hotel names
+        hotels = sorted(set(hotels), key=hotels.index)
 
-    # google search result
-    links = googleSearchLink(name)
-    img = googleSearchImg(name)
-    hotel_to_tw.update({"img": img, "search_results":links})
+        for n in hotels:
+            try:
+                # check if the hotel exists in current state
+                if n != name:
+                    temp = db.hotels.find_one({"名称": n}, show)
+                    if temp is not None:
+                        result.append(temp)
+            except:
+                return jsonify({'message':'Fail to find hotel with hotel name {}.'.formet(n)}), 400
 
-    return jsonify({'message':'ok',  'data':hotel_to_tw}), 200
+    if len(result) == 0:
+        return jsonify({'message':'No hotel exists in user state and history.'}), 200
+
+    result_to_tw = []
+
+    for obj in result:
+
+        # simplified chinese to mandarin
+        obj_to_tw = sp2tw(obj)
+        
+        # google search result
+        links = googleSearchLink(obj['名称'])
+        img = googleSearchImg(obj['名称'])
+        obj_to_tw.update({"img": img, "search_results":links})
+
+        result_to_tw.append(obj_to_tw)
+
+    return jsonify({'message':'ok',  'data':result_to_tw}), 200
 
 @app.route('/getSiteInfo', methods=['GET'])
 def getSiteInfo():
+    result = []
     show = {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '游玩时间': 1, '门票': 1}
 
     user_id = request.args.get("user_id")
@@ -205,38 +238,72 @@ def getSiteInfo():
     if user_id is None:
         return jsonify({'message': 'Fail to get request parameter.'}), 400
 
+    # get current state site info
     try:
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
+        # check if user state exists
+        if belief_state is None:
+            return jsonify({'message':'User state not exists.'}), 200
     except:
         return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
     
-    # check if user state exists
-    if belief_state is None:
-        return jsonify({'message':'User state not exists.'}), 200
-    
     name = belief_state['belief_state']['景点']['名称']
-
+    
     # find site with site name in state
     try: 
         site = db.attractions.find_one({"名称": name}, show)
+        # if site is None :
+        #     return jsonify({'message':'Site name not exists.'}), 200
+        if site is not None :
+            result.append(site)
     except:
-        return jsonify({'message':'Fail to find site with site name {}.'.formet(name)}), 400
+        return jsonify({'message':'Fail to find sites with site name {}.'.formet(name)}), 400
 
-    if site is None :
-        return jsonify({'message':'Site name not exists.'}), 200
+    # get history site info
+    try:
+        select = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+    except:
+        return jsonify({'message':'Fail to get history site with user id {}.'.format(user_id)}), 400
 
-    # simplified chinese to mandarin
-    site_to_tw = sp2tw(site)
+    if select is not None:
+        history = select['content']
+        sites = [x['name'] for x in history if x['domain'] == '景点']
 
-    # google search result
-    links = googleSearchLink(name)
-    img = googleSearchImg(name)
-    site_to_tw.update({"img": img, "search_results":links})
+        # get unique values of site names
+        sites = sorted(set(sites), key=sites.index)
 
-    return jsonify({'message':'ok',  'data':site_to_tw}), 200
+        for n in sites:
+            # check if the site exists in current state
+            if n != name:
+                try:
+                    temp = db.attractions.find_one({"名称": n}, show)
+                    if temp is not None:
+                        result.append(temp)
+                except:
+                    return jsonify({'message':'Fail to find site with site name {}.'.formet(n)}), 400
+
+    if len(result) == 0:
+        return jsonify({'message':'No site exists in user state and history.'}), 200
+
+    result_to_tw = []
+
+    for obj in result:
+
+        # simplified chinese to mandarin
+        obj_to_tw = sp2tw(obj)
+        
+        # google search result
+        links = googleSearchLink(obj['名称'])
+        img = googleSearchImg(obj['名称'])
+        obj_to_tw.update({"img": img, "search_results":links})
+
+        result_to_tw.append(obj_to_tw)
+
+    return jsonify({'message':'ok',  'data':result_to_tw}), 200
 
 @app.route('/getRestInfo', methods=['GET'])
 def getRestInfo():
+    result = []
     show = {'_id': 0, '名称': 1, '评分': 1, '电话': 1, '地址': 1, '地铁': 1, '营业时间': 1, '人均消费': 1}
 
     user_id = request.args.get("user_id")
@@ -244,35 +311,68 @@ def getRestInfo():
     if user_id is None:
         return jsonify({'message': 'Fail to get request parameter.'}), 400
 
+    # get current state rest info
     try:
         belief_state = db.states.find_one({"user_id": ObjectId(user_id)},{"_id": 0, "belief_state": 1})
+        # check if user state exists
+        if belief_state is None:
+            return jsonify({'message':'User state not exists.'}), 200
     except:
         return jsonify({'message':'Fail to find state with user id {}.'.format(user_id)}), 400
-    
-    # check if user state exists
-    if belief_state is None:
-        return jsonify({'message':'User state not exists.'}), 200
     
     name = belief_state['belief_state']['餐馆']['名称']
 
     # find site with site name in state
     try: 
         rest = db.restaurants.find_one({"名称": name}, show)
+        # if rest is None :
+        #     return jsonify({'message':'Restaurant name not exists.'}), 200
+        if rest is not None :
+            result.append(rest)
     except:
         return jsonify({'message':'Fail to find restaurant with restaurant name {}.'.formet(name)}), 400
 
-    if rest is None :
-        return jsonify({'message':'Restaurant name not exists.'}), 200
+    # get history rest info
+    try:
+        select = db.select.find_one({ "user_id": ObjectId(user_id), "expired": False })
+    except:
+        return jsonify({'message':'Fail to get history restaurants with user id {}.'.format(user_id)}), 400
 
-    # simplified chinese to mandarin
-    rest_to_tw = sp2tw(rest)
+    if select is not None:
+        history = select['content']
+        rests = [x['name'] for x in history if x['domain'] == '餐馆']
 
-    # google search result
-    links = googleSearchLink(name)
-    img = googleSearchImg(name)
-    rest_to_tw.update({"img": img, "search_results":links})
+        # get unique values of rest names
+        rests = sorted(set(rests), key=rests.index)
 
-    return jsonify({'message':'ok',  'data':rest_to_tw}), 200
+        for n in rests:
+            # check if the rest exists in current state
+            if n != name:
+                try:
+                    temp = db.restaurants.find_one({"名称": n}, show)
+                    if temp is not None:
+                        result.append(temp)
+                except:
+                    return jsonify({'message':'Fail to find site with site name {}.'.formet(n)}), 400
+
+    if len(result) == 0:
+        return jsonify({'message':'No rest exists in user state and history.'}), 200
+
+    result_to_tw = []
+
+    for obj in result:
+
+        # simplified chinese to mandarin
+        obj_to_tw = sp2tw(obj)
+        
+        # google search result
+        links = googleSearchLink(obj['名称'])
+        img = googleSearchImg(obj['名称'])
+        obj_to_tw.update({"img": img, "search_results":links})
+
+        result_to_tw.append(obj_to_tw)
+
+    return jsonify({'message':'ok',  'data':result_to_tw}), 200
 
 
 commonWord = {}
