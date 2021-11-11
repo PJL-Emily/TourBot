@@ -20,7 +20,28 @@ function Chatpage () {
   const navigateToHome = () => {
     history.push("/");
   };
+
+  useEffect(() => {
+    const unloadCallback = (event) => {
+      event.preventDefault();
+      // event.returnValue = "";
+      Service.restart()
+      .then((data) => {
+        console.log("response data", data);
+        window.location.reload(false);
+      })
+      .catch((err) => {
+          console.log(err);
+      }); 
+      // return "";
+    };
+  
+    window.addEventListener("beforeunload", unloadCallback);
+    return () => window.removeEventListener("beforeunload", unloadCallback);
+  }, []);
+
   const restartPage = () => {
+    console.log("in restart page");
     let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
     if (window.confirm(msg)) {
       Service.restart()

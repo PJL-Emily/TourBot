@@ -27,7 +27,7 @@ export class MapContainer extends Component {
             for(let i = 0; i < this.state.locations.length; i++) {
                 getGeocode(this.state.locations[i])
                 .then((results) => {
-                    // console.log("results", results);
+                    // console.log("geocode results", results);
                     this.setState({
                         markers: [...this.state.markers, {
                             lat: results.geometry.location.lat,
@@ -49,6 +49,21 @@ export class MapContainer extends Component {
         this.fetchGeocode();
     }
 
+    componentWillReceiveProps(nextProps){
+        if (nextProps.locations.length > this.state.locations.length){
+            console.log("should update locations");
+            this.setState({
+                locations: nextProps.locations
+            });
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.locations.length > prevProps.locations.length){
+            this.fetchGeocode();
+        }
+    }
+
     onMarkerClick = (props, marker, e) => {
         this.setState({
         selectedPlace: props,
@@ -66,7 +81,6 @@ export class MapContainer extends Component {
     }};
 
     render() {
-        // console.log("locations", this.state.markers);
         if(this.state.markers.length > 0) {
             return (
                 <Map

@@ -1,6 +1,7 @@
 @import 'library';
 
 .state-ctnr {
+    @include fade-in;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
