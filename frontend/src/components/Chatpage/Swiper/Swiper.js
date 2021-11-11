@@ -123,7 +123,9 @@ const ViewItem = ({type, effect}) => {
   }, [values, setValues]);
 
   useEffect(() => {
-    fetchValues();
+    if(renderCnt > 0) {
+      fetchValues();
+    }
   }, [renderCnt]);
 
   //////////////////////////////////////////////////////

@@ -7,17 +7,7 @@ import GoogleApiWrapper from "./Map";
 import LoadingSpinner from "../LoadingSpinner";
 
 function StateModal ({ dialState, locations }) {
-    // console.log("in stateModal, locations", locations);
-    // console.log("loactions length", locations.length);
-
-    var noContent = true;
-    var cond1 = (dialState.hotel.name !== "" || dialState.rest.name !== "" || dialState.site.name !== "");
-    var cond2 = (dialState.sub[0] !== "" || dialState.sub[1] !== "" || dialState.taxi[0] !== "" || dialState.taxi[0] !== "");
-    if(cond1 || cond2) {
-        noContent = false;
-    }
-
-    if(noContent) {
+    if(!dialState.content) {
         return (
             <div className="info-card">
                 <p>目前還沒有任何結果哦！</p>
@@ -71,7 +61,8 @@ const ViewState = () => {
         site: "",
         rest: "",
         sub: ["", ""],
-        taxi: ["", ""]
+        taxi: ["", ""],
+        content: false
     });
     const [locations, setLocations] = useState([]);
 
@@ -79,50 +70,31 @@ const ViewState = () => {
         setIsLoading(true);
         Service.getUserState()
         .then((data) => {
-            console.log('Response data: ', data);
-            var state = data.data;
-            var loc = [];
-            if(state.hotel.name === "") {
-                state.hotel.name = "未定";
+            console.log('Response data: ', data.message);
+            if(data.data) {
+                var state = data.data;
+                var loc = [];
+                if(state.hotel.name === "" && state.site.name === "" && state.rest.name === "" && state.sub[0] === "" && state.sub[1] === "" && state.taxi[0] === "" && state.taxi[1] === "") {
+                    state.content = false;
+                }
+                
+                setDialState(state);
+                setLocations(loc);
             }
-            else{
-                loc = [...loc,{
-                    name: state.hotel.name,
-                    addr: state.hotel.addr
-                }];
+            else {
+                var state = dialState;
+                state.content = false;
+                // console.log("error state");
+                setDialState({
+                    hotel: "",
+                    site: "",
+                    rest: "",
+                    sub: ["", ""],
+                    taxi: ["", ""],
+                    content: false
+                });
             }
-            if(state.site.name === "") {
-                state.site.name = "未定";
-            }
-            else{
-                loc = [...loc,{
-                    name: state.site.name,
-                    addr: state.site.addr
-                }];
-            }
-            if(state.rest.name === "") {
-                state.rest.name = "未定";
-            }
-            else{
-                loc = [...loc,{
-                    name: state.rest.name,
-                    addr: state.rest.addr
-                }];
-            }
-            if(state.sub[0] === "") {
-                state.sub[0] = "未定";
-            }
-            if(state.sub[1] === "") {
-                state.sub[1] = "未定";
-            }
-            if(state.taxi[0] === "") {
-                state.taxi[0] = "未定";
-            }
-            if(state.taxi[1] === "") {
-                state.taxi[1] = "未定";
-            }
-            setDialState(state);
-            setLocations(loc);
+
             setIsLoading(false);
         })
         .catch((err) => {
@@ -131,7 +103,11 @@ const ViewState = () => {
         });
     }, [dialState, setDialState, locations, setLocations]);
 
-    useEffect(() => fetchState(), [renderCnt]);
+    useEffect(() => {
+        if(renderCnt > 0) {
+            fetchState();
+        }
+    }, [renderCnt]);
 
     var modalContent;
     if(isLoading) {

@@ -8,6 +8,7 @@ import { Link, useHistory } from 'react-router-dom';
 import ViewState from './State/ViewState';
 import ViewItem from './Swiper/Swiper';
 import Service from "../../services/service";
+import { useWindowUnloadEffect } from "../useWindowUnloadEffect";
 
 
 function Chatpage () {
@@ -21,24 +22,21 @@ function Chatpage () {
     history.push("/");
   };
 
-  useEffect(() => {
-    const unloadCallback = (event) => {
-      event.preventDefault();
-      // event.returnValue = "";
-      Service.restart()
-      .then((data) => {
-        console.log("response data", data);
-        window.location.reload(false);
-      })
-      .catch((err) => {
-          console.log(err);
-      }); 
-      // return "";
-    };
-  
-    window.addEventListener("beforeunload", unloadCallback);
-    return () => window.removeEventListener("beforeunload", unloadCallback);
-  }, []);
+  const unloadCallback = () => {
+    console.log("UNLOADED");
+    Service.restart_refresh()
+    // .then((data) => {
+    //   console.log("response data", data);
+    //   // setThreads([
+    //   //   {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
+    //   // ]);
+    // })
+    // .catch((err) => {
+    //     console.log(err);
+    // });
+  };
+
+  useWindowUnloadEffect(unloadCallback, true);
 
   const restartPage = () => {
     console.log("in restart page");
