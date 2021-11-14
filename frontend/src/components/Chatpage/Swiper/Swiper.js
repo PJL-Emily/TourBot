@@ -28,6 +28,36 @@ const icon_dict = {
 }
 
 const ItemSwiper = ({ type, values }) => {
+  var swiperContent;
+  
+  if(values.length === 0) {
+    swiperContent = (
+    <SwiperSlide >
+      <InfoCard type={"none"} data={{
+        name: "",
+        rating: "",
+        tel: "",
+        addr: "",
+        near_sub: "",
+        facility: "",
+        price: "",
+        ticket: "",
+        open_time: "",
+        site_time: "",
+        avg_spend: "",
+        img: "",
+        search_results: ["", "", ""]
+      }} />
+    </SwiperSlide>);
+  }
+  else {
+    swiperContent = (values[0].map(anItem => 
+      <SwiperSlide >
+        <InfoCard key={anItem.name} type={type} data={anItem} />
+      </SwiperSlide>   
+    ));
+  }
+
   return (
       <Swiper
         className="item-swiper"
@@ -36,14 +66,7 @@ const ItemSwiper = ({ type, values }) => {
         slidesPerView={1}
         spaceBetween={50}
       >
-        <SwiperSlide >
-            <InfoCard key={values.name} type={type} data={values} />
-          </SwiperSlide>
-        {/* {values.map(anItem => 
-          <SwiperSlide >
-            <InfoCard key={anItem.name} type={type} data={anItem} />
-          </SwiperSlide>
-        )} */}
+        {swiperContent}
       </Swiper>
   );
 };
@@ -57,21 +80,7 @@ const ViewItem = ({type, effect}) => {
   
   //////////////////////////////////////////////////////
   // TODO: change to list
-  const [values, setValues] = useState({
-    name: "",
-    rating: "",
-    tel: "",
-    addr: "",
-    near_sub: "",
-    facility: "",
-    price: "",
-    ticket: "",
-    open_time: "",
-    site_time: "",
-    avg_spend: "",
-    img: "",
-    search_results: ["", "", ""]
-  });
+  const [values, setValues] = useState([]);
   const fetchValues = useCallback(async () => {
     setIsLoading(true);
     func_dict[type]()
@@ -83,32 +92,34 @@ const ViewItem = ({type, effect}) => {
     })
     .then(data => {
       // rename keys to English
-      data['name'] = data["名稱"];
-      data['rating'] = data["評分"];
-      data['tel'] = data["電話"];
-      data['addr'] = data["地址"];
-      data['near_sub'] = data["地鐵"];
-      data['facility'] = data["酒店設施"];
-      data['price'] = data["價格"];
-      data['ticket'] = data["門票"];
-      data['open_time'] = data["營業時間"];
-      data['site_time'] = data["遊玩時間"];
-      data['avg_spend'] = data["人均消費"];
+      for(let i = 0; i < data.length; i++) {
+        data[i]['name'] = data[i]["名稱"];
+        data[i]['rating'] = data[i]["評分"];
+        data[i]['tel'] = data[i]["電話"];
+        data[i]['addr'] = data[i]["地址"];
+        data[i]['near_sub'] = data[i]["地鐵"];
+        data[i]['facility'] = data[i]["酒店設施"];
+        data[i]['price'] = data[i]["價格"];
+        data[i]['ticket'] = data[i]["門票"];
+        data[i]['open_time'] = data[i]["營業時間"];
+        data[i]['site_time'] = data[i]["遊玩時間"];
+        data[i]['avg_spend'] = data[i]["人均消費"];
+        
+        // delete
+        delete data[i]["名稱"];
+        delete data[i]["評分"];
+        delete data[i]["電話"];
+        delete data[i]["地址"];
+        delete data[i]["地鐵"];
+        delete data[i]["酒店設施"];
+        delete data[i]["價格"];
+        delete data[i]["門票"];
+        delete data[i]["營業時間"];
+        delete data[i]["遊玩時間"];
+        delete data[i]["人均消費"];
+      }
       
-      // delete
-      delete data["名稱"];
-      delete data["評分"];
-      delete data["電話"];
-      delete data["地址"];
-      delete data["地鐵"];
-      delete data["酒店設施"];
-      delete data["價格"];
-      delete data["門票"];
-      delete data["營業時間"];
-      delete data["遊玩時間"];
-      delete data["人均消費"];
-
-      setValues(data);
+      setValues([...values, data]);
       setIsLoading(false);
     })
     .catch(error => {

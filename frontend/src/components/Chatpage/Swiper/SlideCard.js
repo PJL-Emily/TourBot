@@ -120,7 +120,8 @@ const InfoCard = ({ type, data }) => {
     const func_dict = {
         "酒店": HotelInfo,
         "景點": SiteInfo,
-        "餐廳": RestInfo
+        "餐廳": RestInfo,
+        "none": () => { return null; }
     };
     const info = func_dict[type](data);
 

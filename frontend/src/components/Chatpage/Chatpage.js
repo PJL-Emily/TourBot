@@ -27,15 +27,6 @@ function Chatpage () {
   const unloadCallback = () => {
     console.log("UNLOADED");
     Service.restart_refresh()
-    // .then((data) => {
-    //   console.log("response data", data);
-    //   // setThreads([
-    //   //   {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
-    //   // ]);
-    // })
-    // .catch((err) => {
-    //     console.log(err);
-    // });
   };
 
   useWindowUnloadEffect(unloadCallback, true);
@@ -286,23 +277,6 @@ function Chatpage () {
                 />
               </div>
               <div className="Chat infoExit">
-
-
-
-                <div className="Chat restart">
-                  <a onClick={() => {
-                    setHotel((hotel) => hotel + 1);
-                    console.log(hotel);
-                  }}>
-                    <span className="material-icons Chat btn">
-                      restart_alt
-                    </span>          
-                    <p>test setHotel</p>
-                  </a>
-                </div>
-
-
-                
                 <div className="Chat restart">
                   <a onClick={restartPage}>
                     <span className="material-icons Chat btn">
