@@ -16,6 +16,8 @@ function Chatpage () {
   const [hotel, setHotel] = useState(0);
   const [rest, setRest] = useState(0);
   const [site, setSite] = useState(0);
+  const [taxiStart, setTaxiStart] = useState("");
+  const [taxiEnd, setTaxiEnd] = useState("");
 
   const history = useHistory();
   const navigateToHome = () => {
@@ -90,18 +92,12 @@ function Chatpage () {
   });
 
   const handleMessageChange = (event) => {
-    // console.log("Message Change Event: ",event);
     setNewMessage(event.target.value);
-    // console.log("Set State after message change =>", newMessage);
   }
   const handleKeyDown = (event) => {
     const message = event.target.value;
-    // console.log("Key Down Message: ",message);
-    // console.log("Key Down Event: ",event);
     const time = new Date().toDateString();
-    // console.log("Key Down Time: ",time);
     const addMessage = {fromMe: true, text: message, time: time};
-    // console.log("Key Down AddMessage: ",addMessage);
 
     if (event.keyCode === 13 && message !== '') {
       Service.sendUserUtter(newMessage)
@@ -121,6 +117,41 @@ function Chatpage () {
         setThreads((threads) =>
         [...threads, reMessage]
         );
+
+        // blink
+        if(data.data.hotel === true){
+          setHotel((hotel) => hotel + 1);
+          console.log(hotel);
+        }
+        if(data.data.rest === true){
+          setRest((rest) => rest + 1);
+        }
+        if(data.data.site === true){
+          setSite((site) => site + 1);
+        }
+        // if(data.data.taxi === true){
+        //   Service.getUserState()
+        //   .then(data => {
+        //     console.log('Response UserState data: ', data);
+        //     setTaxiStart((taxiStart) => data.data.taxi[0]);
+        //     setTaxiEnd((taxiEnd => data.data.taxi[1]));
+        //     const sysMsg = "從" + taxiStart + "到" + taxiEnd;
+        //     console.log('System message = ', sysMsg)
+        //     const reMessage = {fromMe: false, text: sysMsg, time: time};
+        //     setThreads((threads) =>
+        //     [...threads, reMessage]
+        //     );  
+        //   })
+        //   .catch(error => {
+        //     const resMessage =
+        //       (error.response && error.response.data 
+        //         && error.response.data.message) || 
+        //         error.message || error.toString();
+    
+        //         console.log('getUserState error: ', resMessage);
+        //         alert('getUserState失敗');
+        //   })
+        // }
       })
       .catch(error => {
         const resMessage =
@@ -129,32 +160,15 @@ function Chatpage () {
             error.message || error.toString();
 
             console.log('sendUserUtter error: ', resMessage);
-            //TEST
-            // alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
-            // setThreads((threads) =>
-            // [...threads, addMessage]
-            // );
-            // setNewMessage('');
-            // const reMessage = {fromMe: false, text: "我是機器人", time: time};
-            // setThreads((threads) =>
-            // [...threads, reMessage]
-            // );
-            //
+            alert('sendUserUtter 失敗');
       })
-
-      // setThreads((threads) =>
-      // [...threads, addMessage]
-      // );
-      // setNewMessage('');
     }
   }
   const handleSendMessage = (event) => {
     const time = new Date().toDateString();
     const addMessage = {fromMe: true, text: newMessage, time: time};
-    // console.log("Send Button AddMessage: ",addMessage);
 
     if (newMessage !== '') {
-      // HERE
       Service.sendUserUtter(newMessage)
       .then(data => {
         console.log('Send user utterance: ', newMessage);
@@ -171,6 +185,41 @@ function Chatpage () {
         setThreads((threads) =>
         [...threads, reMessage]
         );
+
+        // blink
+        if(data.data.hotel === true){
+          setHotel((hotel) => hotel + 1);
+          console.log(hotel);
+        }
+        if(data.data.rest === true){
+          setRest((rest) => rest + 1);
+        }
+        if(data.data.site === true){
+          setSite((site) => site + 1);
+        }
+        // if(data.data.taxi === true){
+        //   Service.getUserState()
+        //   .then(data => {
+        //     console.log('Response UserState data: ', data);
+        //     setTaxiStart((taxiStart) => data.data.taxi[0]);
+        //     setTaxiEnd((taxiEnd => data.data.taxi[1]));
+        //     const sysMsg = "從" + taxiStart + "到" + taxiEnd;
+        //     console.log('System message = ', sysMsg)
+        //     const reMessage = {fromMe: false, text: sysMsg, time: time};
+        //     setThreads((threads) =>
+        //     [...threads, reMessage]
+        //     );
+        //   })
+        //   .catch(error => {
+        //     const resMessage =
+        //       (error.response && error.response.data 
+        //         && error.response.data.message) || 
+        //         error.message || error.toString();
+    
+        //         console.log('getUserState error: ', resMessage);
+        //         alert('getUserState失敗');
+        //   })
+        // }
       })
       .catch(error => {
         const resMessage =
@@ -180,22 +229,8 @@ function Chatpage () {
 
             console.log('sendUserUtter error: ', resMessage);
             //TEST
-            // alert('測試階段：sendUserUtter 失敗同樣傳進聊天室');
-            // setThreads((threads) =>
-            // [...threads, addMessage]
-            // );
-            // setNewMessage('');
-            // const reMessage = {fromMe: false, text: "我是機器人", time: time};
-            // setThreads((threads) =>
-            // [...threads, reMessage]
-            // );
-            //
+            alert('sendUserUtter 失敗');
       })
-
-      // setThreads((threads) =>
-      // [...threads, addMessage]
-      // );
-      // setNewMessage('');
     }
   }
 
