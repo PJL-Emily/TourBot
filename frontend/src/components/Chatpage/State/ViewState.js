@@ -70,14 +70,47 @@ const ViewState = () => {
         setIsLoading(true);
         Service.getUserState()
         .then((data) => {
-            console.log('Response data: ', data.message);
+            console.log('Response data: ', data);
             if(data.data) {
                 var state = data.data;
                 var loc = [];
-                if(state.hotel.name === "" && state.site.name === "" && state.rest.name === "" && state.sub[0] === "" && state.sub[1] === "" && state.taxi[0] === "" && state.taxi[1] === "") {
-                    state.content = false;
+                let emptyCnt = 0;
+                if(state.hotel.name === "") {
+                    emptyCnt += 1;
+                    state.hotel.name = "未定";
+                }
+                if(state.rest.name === "") {
+                    emptyCnt += 1;
+                    state.rest.name = "未定";
+                }
+                if(state.site.name === "") {
+                    emptyCnt += 1;
+                    state.site.name = "未定";
+                }
+                if(state.sub[0] === "") {
+                    emptyCnt += 1;
+                    state.sub[0] = "未定";
+                }
+                if(state.sub[1] === "") {
+                    emptyCnt += 1;
+                    state.sub[1] = "未定";
+                }
+                if(state.taxi[0] === "") {
+                    emptyCnt += 1;
+                    state.taxi[0] = "未定";
+                }
+                if(state.taxi[1] === "") {
+                    emptyCnt += 1;
+                    state.taxi[1] = "未定";
                 }
                 
+                if(emptyCnt === 7) {
+                    state.content = false;
+                }
+                else {
+                    state.content = true;
+                }
+
                 setDialState(state);
                 setLocations(loc);
             }
