@@ -4,40 +4,35 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { Modal } from 'antd';
 import Service from "../../../services/service";
 import GoogleApiWrapper from "./Map";
+import LoadingSpinner from "../LoadingSpinner";
 
-function StateModal ({ dialState }) {
+function StateModal ({ dialState, locations }) {
+    if(!dialState.content) {
+        return (
+            <div className="info-card">
+                <p>目前還沒有任何結果哦！</p>
+            </div>
+        );
+    }
     return (
         <div class="state-ctnr">
             {/* <GoogleApiWrapper
-                locations={[
-                    {
-                        name: "北京贵都大酒店",
-                        addr: "北京西城区广安门内大街217号"
-                    },
-                    {
-                        name: "北京鹏润国际大酒店",
-                        addr: "北京朝阳区霄云路26号"
-                    },
-                    // {
-                    //     name: "瑞尔威连锁饭店(北京西客站店)",
-                    //     addr: "北京丰台区莲花池东路116-2号"
-                    // }
-                ]}
+                locations={locations}
             >
             </GoogleApiWrapper> */}
             <ul className="state-list">
                 <li>
                     <span className="material-icons Chat btn">bed</span>
-                    {dialState.hotel}
+                    {dialState.hotel.name}
                     
                 </li>
                 <li>
                     <span className="material-icons Chat btn">museum</span>
-                    {dialState.site}
+                    {dialState.site.name}
                 </li>
                 <li>
                     <span className="material-icons Chat btn">restaurant_menu</span>
-                    {dialState.rest}
+                    {dialState.rest.name}
                 </li>
                 <li>
                     <span className="material-icons Chat btn">subway</span>
@@ -60,64 +55,100 @@ function StateModal ({ dialState }) {
 const ViewState = () => {
     const [visible, setVisible] = useState(false);
     const [renderCnt, setRenderCnt] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const [dialState, setDialState] = useState({
         hotel: "",
         site: "",
         rest: "",
         sub: ["", ""],
-        taxi: ["", ""]
+        taxi: ["", ""],
+        content: false
     });
-    // const [locations, setLocations] = useState([]);
+    const [locations, setLocations] = useState([]);
 
     const fetchState = useCallback(async () => {
+        setIsLoading(true);
         Service.getUserState()
         .then((data) => {
             console.log('Response data: ', data);
-            var state = data.data;
-            if(state.hotel === "") {
-                state.hotel = "未定";
+            if(data.data) {
+                var state = data.data;
+                var loc = [];
+                let emptyCnt = 0;
+                if(state.hotel.name === "") {
+                    emptyCnt += 1;
+                    state.hotel.name = "未定";
+                }
+                if(state.rest.name === "") {
+                    emptyCnt += 1;
+                    state.rest.name = "未定";
+                }
+                if(state.site.name === "") {
+                    emptyCnt += 1;
+                    state.site.name = "未定";
+                }
+                if(state.sub[0] === "") {
+                    emptyCnt += 1;
+                    state.sub[0] = "未定";
+                }
+                if(state.sub[1] === "") {
+                    emptyCnt += 1;
+                    state.sub[1] = "未定";
+                }
+                if(state.taxi[0] === "") {
+                    emptyCnt += 1;
+                    state.taxi[0] = "未定";
+                }
+                if(state.taxi[1] === "") {
+                    emptyCnt += 1;
+                    state.taxi[1] = "未定";
+                }
+                
+                if(emptyCnt === 7) {
+                    state.content = false;
+                }
+                else {
+                    state.content = true;
+                }
+
+                setDialState(state);
+                setLocations(loc);
             }
-            if(state.site === "") {
-                state.site = "未定";
+            else {
+                var state = dialState;
+                state.content = false;
+                // console.log("error state");
+                setDialState({
+                    hotel: "",
+                    site: "",
+                    rest: "",
+                    sub: ["", ""],
+                    taxi: ["", ""],
+                    content: false
+                });
             }
-            if(state.rest === "") {
-                state.rest = "未定";
-            }
-            if(state.sub[0] === "") {
-                state.sub[0] = "未定";
-            }
-            if(state.sub[1] === "") {
-                state.sub[1] = "未定";
-            }
-            if(state.taxi[0] === "") {
-                state.taxi[0] = "未定";
-            }
-            if(state.taxi[1] === "") {
-                state.taxi[1] = "未定";
-            }
-            setDialState(state);
+
+            setIsLoading(false);
         })
         .catch((err) => {
             console.log(err);
+            setIsLoading(false);
         });
-    }, [dialState, setDialState]);
+    }, [dialState, setDialState, locations, setLocations]);
 
     useEffect(() => {
-        fetchState();
-
-        // set locations
-        // var temp = [];
-        // if(dialState.hotel !== "") {
-        //     temp = [...temp, dialState.hotel];
-        // }
-        // if(dialState.site !== "") {
-        //     temp = [...temp, dialState.site];
-        // }
-        // if(dialState.rest !== "") {
-        //     temp = [...temp, dialState.rest];
-        // }
-        // setLocations(temp);
+        if(renderCnt > 0) {
+            fetchState();
+        }
     }, [renderCnt]);
+
+    var modalContent;
+    if(isLoading) {
+        modalContent = (<LoadingSpinner />);
+    }
+    else {
+        modalContent = (<StateModal dialState={dialState} locations={locations}/>);
+    }
 
     return (
         <div>
@@ -152,7 +183,7 @@ const ViewState = () => {
                 }}
                 footer={null}
             >
-                <StateModal dialState={dialState}/>
+                {modalContent}
             </Modal>
         </div>
     );

@@ -7,7 +7,7 @@ const submitUserInfo = async (purpose, gender, age) => {
         gender: gender,
         age: age
     };
-    console.log("data to send: ", data);
+    // console.log("data to send: ", data);
     const response = await api
         .post("submitUserInfo", data);
     if (response.data.data.user_id) {
@@ -39,13 +39,20 @@ const restart = async () => {
     return response.data;
 };
 
+const restart_refresh = async () => {
+    var data = { user_id: TokenService.getUser().user_id };
+    // var data = { user_id: "test_id" };
+
+    api.post("restartSession", data);
+};
+
 const exit = () => {
     TokenService.removeUser();
 }
 
 const getUserState = async () => {
     var data = { user_id: TokenService.getUser().user_id };
-    console.log("data: ", data);
+    // console.log("data: ", data);
     // var data = { user_id: "test_id" };
 
     const response = await api
@@ -57,7 +64,7 @@ const getUserState = async () => {
 const getHotelInfo = async () => {
     var data = { user_id: TokenService.getUser().user_id };
     // var data = { user_id: "test_id" };
-    console.log("data: ", data);
+    // console.log("data: ", data);
 
     const response = await api
         .get("getHotelInfo", {params: data});
@@ -89,6 +96,7 @@ const Service = {
     submitUserInfo,
     sendUserUtter,
     restart,
+    restart_refresh,
     exit,
     getUserState,
     getHotelInfo,

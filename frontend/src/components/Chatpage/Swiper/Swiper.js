@@ -5,15 +5,15 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import Service from "../../../services/service";
 import { useIsFirstRender } from '../../useIsFirstRender';
 import InfoCard from './SlideCard';
+import LoadingSpinner from "../LoadingSpinner";
 import 'swiper/swiper.scss';
 import "swiper/components/pagination/pagination.scss";
 import "swiper/components/navigation/navigation.scss";
 import '../../../scss/main.scss';
 
 // TODO
-// 1. loading spinner
-// 2. values as list
-// 3. ctrl+R send restart!
+// 1. values as list
+// 2. ctrl+R send restart!
 
 SwiperCore.use([ Navigation, Pagination, Scrollbar ]);
 const func_dict = {
@@ -50,6 +50,7 @@ const ItemSwiper = ({ type, values }) => {
 
 const ViewItem = ({type, effect}) => {
   const [visible, setVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
   const isFirstRender = useIsFirstRender();
   const [renderCnt, setRenderCnt] = useState(0);
@@ -72,6 +73,7 @@ const ViewItem = ({type, effect}) => {
     search_results: ["", "", ""]
   });
   const fetchValues = useCallback(async () => {
+    setIsLoading(true);
     func_dict[type]()
     .then(data => {
       // TODO: change to list
@@ -107,6 +109,7 @@ const ViewItem = ({type, effect}) => {
       delete data["人均消費"];
 
       setValues(data);
+      setIsLoading(false);
     })
     .catch(error => {
       const resMessage =
@@ -115,11 +118,14 @@ const ViewItem = ({type, effect}) => {
           error.message || error.toString();
       
       console.log('getInfo error: ', resMessage);
+      setIsLoading(false);
     });
   }, [values, setValues]);
 
   useEffect(() => {
-    fetchValues();
+    if(renderCnt > 0) {
+      fetchValues();
+    }
   }, [renderCnt]);
 
   //////////////////////////////////////////////////////
@@ -131,6 +137,14 @@ const ViewItem = ({type, effect}) => {
       setTimeout(() => setIsFlashing(false), 5000);
     }
   }, [effect]);
+
+  var modalContent;
+  if(isLoading) {
+    modalContent = (<LoadingSpinner />);
+  }
+  else {
+    modalContent = (<ItemSwiper type={type} values={values} />);
+  }
 
   return (
     <div>
@@ -156,7 +170,7 @@ const ViewItem = ({type, effect}) => {
         }}
         footer={null}
       >
-        <ItemSwiper type={type} values={values} />
+        {modalContent}
       </Modal>
     </div>
 

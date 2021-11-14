@@ -8,6 +8,7 @@ import { Link, useHistory } from 'react-router-dom';
 import ViewState from './State/ViewState';
 import ViewItem from './Swiper/Swiper';
 import Service from "../../services/service";
+import { useWindowUnloadEffect } from "../useWindowUnloadEffect";
 
 
 function Chatpage () {
@@ -22,7 +23,25 @@ function Chatpage () {
   const navigateToHome = () => {
     history.push("/");
   };
+
+  const unloadCallback = () => {
+    console.log("UNLOADED");
+    Service.restart_refresh()
+    // .then((data) => {
+    //   console.log("response data", data);
+    //   // setThreads([
+    //   //   {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
+    //   // ]);
+    // })
+    // .catch((err) => {
+    //     console.log(err);
+    // });
+  };
+
+  useWindowUnloadEffect(unloadCallback, true);
+
   const restartPage = () => {
+    console.log("in restart page");
     let msg = "您確定要重新開始聊天嗎？\n所有聊天記錄將被清空，但仍可保留您的個人資訊";
     if (window.confirm(msg)) {
       Service.restart()
