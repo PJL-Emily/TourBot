@@ -18,6 +18,7 @@ function Chatpage () {
   const [site, setSite] = useState(0);
   const [taxiStart, setTaxiStart] = useState("");
   const [taxiEnd, setTaxiEnd] = useState("");
+  // window.open("http://www.96103.cn/call")
 
   const history = useHistory();
   const navigateToHome = () => {
@@ -129,29 +130,34 @@ function Chatpage () {
         if(data.data.site === true){
           setSite((site) => site + 1);
         }
-        // if(data.data.taxi === true){
-        //   Service.getUserState()
-        //   .then(data => {
-        //     console.log('Response UserState data: ', data);
-        //     setTaxiStart((taxiStart) => data.data.taxi[0]);
-        //     setTaxiEnd((taxiEnd => data.data.taxi[1]));
-        //     const sysMsg = "從" + taxiStart + "到" + taxiEnd;
-        //     console.log('System message = ', sysMsg)
-        //     const reMessage = {fromMe: false, text: sysMsg, time: time};
-        //     setThreads((threads) =>
-        //     [...threads, reMessage]
-        //     );  
-        //   })
-        //   .catch(error => {
-        //     const resMessage =
-        //       (error.response && error.response.data 
-        //         && error.response.data.message) || 
-        //         error.message || error.toString();
+        if(data.data.taxi === true){
+          Service.getUserState()
+          .then(data => {
+            console.log('Response UserState data: ', data);
+            setTaxiStart(data.data.taxi[0]);
+            setTaxiEnd(data.data.taxi[1]);
+            if(taxiStart === ""){
+              setTaxiStart("現在位置")
+            }
+            const sysMsg = "您的起訖點為：（" + taxiStart + "）到（" + taxiEnd + "）";
+            console.log('System message = ', sysMsg)
+            const reMessage = {fromMe: false, text: sysMsg, time: time};
+            setThreads((threads) =>
+            [...threads, reMessage]
+            );
+            // change CSS
+            setCSS();
+          })
+          .catch(error => {
+            const resMessage =
+              (error.response && error.response.data 
+                && error.response.data.message) || 
+                error.message || error.toString();
     
-        //         console.log('getUserState error: ', resMessage);
-        //         alert('getUserState失敗');
-        //   })
-        // }
+                console.log('getUserState error: ', resMessage);
+                alert('getUserState失敗');
+          })
+        }
       })
       .catch(error => {
         const resMessage =
@@ -197,29 +203,34 @@ function Chatpage () {
         if(data.data.site === true){
           setSite((site) => site + 1);
         }
-        // if(data.data.taxi === true){
-        //   Service.getUserState()
-        //   .then(data => {
-        //     console.log('Response UserState data: ', data);
-        //     setTaxiStart((taxiStart) => data.data.taxi[0]);
-        //     setTaxiEnd((taxiEnd => data.data.taxi[1]));
-        //     const sysMsg = "從" + taxiStart + "到" + taxiEnd;
-        //     console.log('System message = ', sysMsg)
-        //     const reMessage = {fromMe: false, text: sysMsg, time: time};
-        //     setThreads((threads) =>
-        //     [...threads, reMessage]
-        //     );
-        //   })
-        //   .catch(error => {
-        //     const resMessage =
-        //       (error.response && error.response.data 
-        //         && error.response.data.message) || 
-        //         error.message || error.toString();
+        if(data.data.taxi === true){
+          Service.getUserState()
+          .then(data => {
+            console.log('Response UserState data: ', data);
+            setTaxiStart(data.data.taxi[0]);
+            setTaxiEnd(data.data.taxi[1]);
+            if(taxiStart === ""){
+              setTaxiStart("現在位置")
+            }
+            const sysMsg = "您的起訖點為：（" + taxiStart + "）到（" + taxiEnd + "）";
+            console.log('System message = ', sysMsg)
+            const reMessage = {fromMe: false, text: sysMsg, time: time};
+            setThreads((threads) =>
+            [...threads, reMessage]
+            );
+            // change CSS
+            setCSS();
+          })
+          .catch(error => {
+            const resMessage =
+              (error.response && error.response.data 
+                && error.response.data.message) || 
+                error.message || error.toString();
     
-        //         console.log('getUserState error: ', resMessage);
-        //         alert('getUserState失敗');
-        //   })
-        // }
+                console.log('getUserState error: ', resMessage);
+                alert('getUserState失敗');
+          })
+        }
       })
       .catch(error => {
         const resMessage =
@@ -234,6 +245,16 @@ function Chatpage () {
     }
   }
 
+  const callTaxi = () => {
+    window.open("http://www.96103.cn/call");
+  }
+
+  const setCSS = () =>{
+    setTaxiCss({display: "block"});
+    setBtnCss({width:"10%"});
+    setInputCss({width:"80%"});
+  }
+
   // Handle Input
   const [newMessage, setNewMessage] = useState('')
   const [threads, setThreads] = useState(
@@ -241,6 +262,17 @@ function Chatpage () {
       {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
     ]
   )
+
+  const [inputCss, setInputCss] = useState({
+    width: "85%"
+  });
+  const [btnCss, setBtnCss] = useState({
+    width: "15%"
+  });
+  const [taxiCss, setTaxiCss] = useState({
+    display: "none"
+  });
+
 
   // Scroll the chatroom
   const messagesEndRef = useRef(null)
@@ -262,9 +294,10 @@ function Chatpage () {
                 </div>
               </div>
               <div className="Chat inputForm">
-                <input className="Chat inputbox" type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
-                <button className="Chat sendbtn" id="usrsend" name="usrsend" onChange={handleMessageChange} onClick={handleSendMessage}>傳送</button>
-              </div>
+                <input className="Chat inputbox" style={inputCss} type="text" id="usrtxt" name="usrtxt" placeholder="請輸入您的疑問..." value={newMessage} onChange={handleMessageChange} onKeyDown={handleKeyDown}></input>
+                <button className="Chat taxi" style={taxiCss} onClick={callTaxi}>叫車嗎？</button>
+                <button className="Chat sendbtn" style={btnCss} id="usrsend" name="usrsend" onChange={handleMessageChange} onClick={handleSendMessage}>傳送</button>
+              </div> 
             </div>
             <div className="Chat inform">
               <img src={logo} className="Chat logo" alt="logo" />
@@ -286,23 +319,6 @@ function Chatpage () {
                 />
               </div>
               <div className="Chat infoExit">
-
-
-
-                <div className="Chat restart">
-                  <a onClick={() => {
-                    setHotel((hotel) => hotel + 1);
-                    console.log(hotel);
-                  }}>
-                    <span className="material-icons Chat btn">
-                      restart_alt
-                    </span>          
-                    <p>test setHotel</p>
-                  </a>
-                </div>
-
-
-                
                 <div className="Chat restart">
                   <a onClick={restartPage}>
                     <span className="material-icons Chat btn">

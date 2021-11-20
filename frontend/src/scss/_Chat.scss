@@ -94,6 +94,9 @@
 
     .inputForm{
         height: 5%;
+        margin-left: 5%;
+        margin-right: 5%;
+        display: flex;
     }
 
     .inputbox {
@@ -117,6 +120,15 @@
     .sendbtn:hover{
         background-color: $red-darker;
         cursor: pointer;
+    }
+
+    .taxi {
+        width: 10%;
+        margin: 0;
+        background-color: $gray-darker;
+        border: none;
+        color: white;
+        font-weight: bold;
     }
 }
 
