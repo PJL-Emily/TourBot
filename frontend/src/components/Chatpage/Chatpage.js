@@ -28,15 +28,6 @@ function Chatpage () {
   const unloadCallback = () => {
     console.log("UNLOADED");
     Service.restart_refresh()
-    // .then((data) => {
-    //   console.log("response data", data);
-    //   // setThreads([
-    //   //   {fromMe: false, text:'請問有什麼能為您服務的呢？', time:'00:00'}
-    //   // ]);
-    // })
-    // .catch((err) => {
-    //     console.log(err);
-    // });
   };
 
   useWindowUnloadEffect(unloadCallback, true);

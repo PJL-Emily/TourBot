@@ -16,10 +16,10 @@ function StateModal ({ dialState, locations }) {
     }
     return (
         <div class="state-ctnr">
-            {/* <GoogleApiWrapper
+            <GoogleApiWrapper
                 locations={locations}
             >
-            </GoogleApiWrapper> */}
+            </GoogleApiWrapper>
             <ul className="state-list">
                 <li>
                     <span className="material-icons Chat btn">bed</span>
@@ -79,29 +79,71 @@ const ViewState = () => {
                     emptyCnt += 1;
                     state.hotel.name = "未定";
                 }
+                else {
+                    loc = [...loc, {
+                        name: state.hotel.name,
+                        addr: state.hotel.addr
+                    }];
+                }
                 if(state.rest.name === "") {
                     emptyCnt += 1;
                     state.rest.name = "未定";
+                }
+                else {
+                    loc = [...loc, {
+                        name: state.rest.name,
+                        addr: state.rest.addr
+                    }];
                 }
                 if(state.site.name === "") {
                     emptyCnt += 1;
                     state.site.name = "未定";
                 }
+                else {
+                    loc = [...loc, {
+                        name: state.site.name,
+                        addr: state.site.addr
+                    }];
+                }
                 if(state.sub[0] === "") {
                     emptyCnt += 1;
                     state.sub[0] = "未定";
+                }
+                else {
+                    loc = [...loc, {
+                        name: state.sub[0].name,
+                        addr: state.sub[0].addr
+                    }];
                 }
                 if(state.sub[1] === "") {
                     emptyCnt += 1;
                     state.sub[1] = "未定";
                 }
+                else {
+                    loc = [...loc, {
+                        name: state.sub[1].name,
+                        addr: state.sub[1].addr
+                    }];
+                }
                 if(state.taxi[0] === "") {
                     emptyCnt += 1;
                     state.taxi[0] = "未定";
                 }
+                else {
+                    loc = [...loc, {
+                        name: state.taxi[0].name,
+                        addr: state.taxi[0].addr
+                    }];
+                }
                 if(state.taxi[1] === "") {
                     emptyCnt += 1;
                     state.taxi[1] = "未定";
+                }
+                else {
+                    loc = [...loc, {
+                        name: state.taxi[1].name,
+                        addr: state.taxi[1].addr
+                    }];
                 }
                 
                 if(emptyCnt === 7) {
@@ -110,7 +152,7 @@ const ViewState = () => {
                 else {
                     state.content = true;
                 }
-
+                
                 setDialState(state);
                 setLocations(loc);
             }

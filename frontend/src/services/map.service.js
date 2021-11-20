@@ -5,6 +5,7 @@ let getGeocode = async function(location) {
     let url = `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODER_KEY}`;
     
     const response = await axios.get(url);
+    console.log("response", response.data);
     return response.data.results[0];
 }
 
