@@ -16,8 +16,8 @@ function Chatpage () {
   const [hotel, setHotel] = useState(0);
   const [rest, setRest] = useState(0);
   const [site, setSite] = useState(0);
-  const [taxiStart, setTaxiStart] = useState("");
-  const [taxiEnd, setTaxiEnd] = useState("");
+  const [taxiStart, setTaxiStart] = useState("現在位置");
+  const [taxiEnd, setTaxiEnd] = useState("目的地");
   // window.open("http://www.96103.cn/call")
 
   const history = useHistory();
@@ -123,15 +123,14 @@ function Chatpage () {
         }
         if(data.data.taxi === true){
           Service.getUserState()
-          .then(data => {
-            console.log('Response UserState data: ', data);
-            setTaxiStart(data.data.taxi[0]);
-            setTaxiEnd(data.data.taxi[1]);
-            if(taxiStart === ""){
-              setTaxiStart("現在位置")
-            }
-            const sysMsg = "您的起訖點為：（" + taxiStart + "）到（" + taxiEnd + "）";
-            console.log('System message = ', sysMsg)
+          .then(data2 => {
+            console.log('Response UserState data: ', data2.data.taxi);
+            if(data2.data.taxi[0] !== ''){
+              setTaxiStart(data2.data.taxi[0].toString());
+            }    
+            setTaxiEnd(data2.data.taxi[1].toString());
+            // const sysMsg = "您的起訖點為：（" + taxiStart + "）到（" + taxiEnd + "）";
+            const sysMsg = "請從下方按鈕前往計程車網站叫車";
             const reMessage = {fromMe: false, text: sysMsg, time: time};
             setThreads((threads) =>
             [...threads, reMessage]
@@ -196,15 +195,14 @@ function Chatpage () {
         }
         if(data.data.taxi === true){
           Service.getUserState()
-          .then(data => {
-            console.log('Response UserState data: ', data);
-            setTaxiStart(data.data.taxi[0]);
-            setTaxiEnd(data.data.taxi[1]);
-            if(taxiStart === ""){
-              setTaxiStart("現在位置")
-            }
-            const sysMsg = "您的起訖點為：（" + taxiStart + "）到（" + taxiEnd + "）";
-            console.log('System message = ', sysMsg)
+          .then(data2 => {
+            console.log('Response UserState data: ', data2.data.taxi);
+            if(data2.data.taxi[0] !== ''){
+              setTaxiStart(data2.data.taxi[0].toString());
+            }    
+            setTaxiEnd(data2.data.taxi[1].toString());
+            // const sysMsg = "您的起訖點為：（" + taxiStart + "）到（" + taxiEnd + "）";
+            const sysMsg = "請從下方按鈕前往計程車網站叫車";
             const reMessage = {fromMe: false, text: sysMsg, time: time};
             setThreads((threads) =>
             [...threads, reMessage]
